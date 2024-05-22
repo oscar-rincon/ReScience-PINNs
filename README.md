@@ -4,7 +4,7 @@ This project is a replication of ''Physics-informed neural networks: A deep lear
 
 The aim of this project was to:
 
-- Reproduce the results from Raissi et al. (2019) using the Python libraries Tensorflow 1x (used in the original paper) and Tensorflow 2x. 
+- Reproduce the main results from Raissi et al. (2019) using the Python libraries Tensorflow 1x (used in the original paper) and Tensorflow 2x. 
 - Save the Tensorflow models obtained from the training of the models presented in the article.
 - Create Jupyter notebooks from the original codes, including the stored models, to facilitate exploration of the program's variables and functions. 
 
@@ -25,8 +25,8 @@ Each example contains the complete codes (`.py`), the notebooks (`.ipynb`), figu
 We recommend setting up a new Python environment with conda. You can do this by running the following commands:
 
  ```
- conda create --name ReScience-PINNs-env
- conda activate ReScience-PINNs-env
+ conda create --name ReScience-PINNs-2-env
+ conda activate ReScience-PINNs-2-env
  ```
 
 Next, clone this repository by using the command:
@@ -46,10 +46,12 @@ In case of Tensorflow 1x:
  In case of Tensorflow 2x:
 
  ```
- conda env update --name ReScience-PINNs-env --file ReScience-PINNs-2.yaml
+ conda env update --name ReScience-PINNs-2-env --file ReScience-PINNs-2.yaml
  ```
 
 To verify the packages installed in your `ReScience-PINNs-env` conda environment, you can use the following command:
 
  ```
  conda list -n ReScience-PINNs-env
+
+ ## Computation times

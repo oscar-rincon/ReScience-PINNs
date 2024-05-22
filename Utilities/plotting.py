@@ -19,28 +19,39 @@ def figsize(scale, nplots = 1):
     fig_size = [fig_width,fig_height]
     return fig_size
 
-pgf_with_latex = {                      # setup matplotlib to use latex for output
-    "pgf.texsystem": "pdflatex",        # change this if using xetex or lautex
-    "text.usetex": True,                # use LaTeX to write all text
-    "font.family": "serif",
-    "font.serif": [],                   # blank entries should cause plots to inherit fonts from the document
-    "font.sans-serif": [],
-    "font.monospace": [],
-    "axes.labelsize": 10,               # LaTeX default is 10pt font.
-    "font.size": 10,
-    "legend.fontsize": 8,               # Make the legend/label fonts a little smaller
-    "xtick.labelsize": 8,
-    "ytick.labelsize": 8,
-    "figure.figsize": figsize(1.0),     # default fig size of 0.9 textwidth
-    "pgf.preamble": [
-        r"\usepackage[utf8x]{inputenc}",    # use utf8 fonts becasue your computer can handle it :)
-        r"\usepackage[T1]{fontenc}",        # plots will be generated using this preamble
-        ]
-    }
-mpl.rcParams.update(pgf_with_latex)
+# pgf_with_latex = {                      # setup matplotlib to use latex for output
+#     "pgf.texsystem": "pdflatex",        # change this if using xetex or lautex
+#     "text.usetex": True,                # use LaTeX to write all text
+#     "font.family": "serif",
+#     "font.serif": [],                   # blank entries should cause plots to inherit fonts from the document
+#     "font.sans-serif": [],
+#     "font.monospace": [],
+#     "axes.labelsize": 10,               # LaTeX default is 10pt font.
+#     "font.size": 10,
+#     "legend.fontsize": 8,               # Make the legend/label fonts a little smaller
+#     "xtick.labelsize": 8,
+#     "ytick.labelsize": 8,
+#     "figure.figsize": figsize(1.0),     # default fig size of 0.9 textwidth
+#     "pgf.preamble": [
+#         r"\usepackage[utf8x]{inputenc}",    # use utf8 fonts becasue your computer can handle it :)
+#         r"\usepackage[T1]{fontenc}",        # plots will be generated using this preamble
+#         ]
+#     }
+#mpl.rcParams.update(pgf_with_latex)
 
 import matplotlib.pyplot as plt
-
+# Actualización de los parámetros de Matplotlib
+mpl.rcParams.update(
+    {
+        'figure.constrained_layout.use': True,
+        'interactive': False,
+        "text.usetex": False,  # Use mathtext, not LaTeX
+        "font.family": "cmr10",  # Use the Computer modern font
+        "mathtext.fontset": "cm",
+        "axes.formatter.use_mathtext": True,
+        "axes.unicode_minus": False,
+    }
+)
 # I make my own newfig and savefig functions
 def newfig(width, nplots = 1):
     fig = plt.figure(figsize=figsize(width, nplots))
