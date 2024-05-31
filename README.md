@@ -1,12 +1,12 @@
 # ReScience-PINNs
 
-This project is a replication of ''Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations'' by M. Raissi, P. Perdikaris, and G.E. Karniadakis.
+This project is a replication of ''Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations'' by M. Raissi, P. Perdikaris, and G.E. Karniadakis from 2019.
 
 The aim of this project was to:
 
-- Reproduce the main results from Raissi et al. (2019) using the Python libraries Tensorflow 1x (used in the original paper) and Tensorflow 2x. 
-- Save the Tensorflow models obtained from the training of the models presented in the article.
-- Create Jupyter notebooks from the original codes, including the stored models, to facilitate exploration of the program's variables and functions. 
+- Reproduce the results from Raissi et al. (2019) using the Python libraries Tensorflow 2x and PyTorch. 
+- Save the models obtained from the training presented in the article.
+- Create Jupyter notebooks including the stored models, to facilitate exploration of the program's variables and functions. 
 
 ## Repository Organisation
 
@@ -18,16 +18,16 @@ The aim of this project was to:
 - `continuous_time_identification (Navier-Stokes)/`: Results corresponding the the 4.1.1. Example (Navier–Stokes equation).
 - `discrete_time_identification (KdV)/`: Results corresponding the the 4.2.1. Example (Korteweg–de Vries equation).
 
-Each example contains the complete codes (`.py`), the notebooks (`.ipynb`), figures (`figures/`) and the models (models/).  
+Each example contains the complete codes (`_tf.py` and `_pt.py`), figures (`figures_tf/` and `figures_pt/`) and the models (`models_tf/` and `models_pt/`).  
 
 ## Installation
 
 We recommend setting up a new Python environment with conda. You can do this by running the following commands:
 
- ```
- conda create --name ReScience-PINNs-2-env
- conda activate ReScience-PINNs-2-env
- ```
+```
+conda create --name ReScience-PINNs-env
+conda activate ReScience-PINNs-env
+```
 
 Next, clone this repository by using the command:
 
@@ -35,23 +35,29 @@ Next, clone this repository by using the command:
 git clone https://github.com/oscar-rincon/ReScience-PINNs.git
  ```
 
-Finally, go to the `ReScience-PINNs/` folder and run the following command to install the necessary dependencies:
-
-In case of Tensorflow 1x:
+Go to the `ReScience-PINNs/` folder and run the following command to install the necessary dependencies:
 
  ```
- conda env update --name ReScience-PINNs-env --file ReScience-PINNs-1.yaml
+conda env update --name ReScience-PINNs-env --file ReScience-PINNs.yaml
  ```
 
- In case of Tensorflow 2x:
-
- ```
- conda env update --name ReScience-PINNs-2-env --file ReScience-PINNs-2.yaml
- ```
-
+We include also include a file with the corresponding depentencies requiered to run the original code (`ReScience-PINNs-tf1.yaml`).
+  
 To verify the packages installed in your `ReScience-PINNs-env` conda environment, you can use the following command:
 
  ```
- conda list -n ReScience-PINNs-env
+conda list -n ReScience-PINNs-env
+ ```
 
  ## Computation times
+
+ 
+|    Programa   | Tensorflow 2 | PyTorch |
+|---------------|--------------|---------|
+| Schrodinger   |              |         |
+|      AC       |              |         |
+| Navier-Stokes |              |         |
+|      KdV      |              |         |
+ 
+
+  ## Instructions

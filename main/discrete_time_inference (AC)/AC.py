@@ -61,8 +61,8 @@ class PhysicsInformedNN:
         
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
                                                                 method = 'L-BFGS-B', 
-                                                                options = {'maxiter': 0,#50000,
-                                                                           'maxfun': 0,#50000,
+                                                                options = {'maxiter': 50000,
+                                                                           'maxfun': 50000,
                                                                            'maxcor': 50,
                                                                            'maxls': 50,
                                                                            'ftol' : 1.0 * np.finfo(float).eps})
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     
     ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
     
-    savefig('./figures/AC')  
+    # savefig('./figures/AC')  
     
 
     

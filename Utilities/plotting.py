@@ -8,6 +8,8 @@ Created on Mon Oct  9 20:11:57 2017
 
 import numpy as np
 import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 #mpl.use('pgf')
 
 def figsize(scale, nplots = 1):
@@ -39,7 +41,6 @@ def figsize(scale, nplots = 1):
 #     }
 #mpl.rcParams.update(pgf_with_latex)
 
-import matplotlib.pyplot as plt
 # Actualización de los parámetros de Matplotlib
 mpl.rcParams.update(
     {
@@ -50,6 +51,7 @@ mpl.rcParams.update(
         "mathtext.fontset": "cm",
         "axes.formatter.use_mathtext": True,
         "axes.unicode_minus": False,
+        "figure.figsize": figsize(1.0),     # default fig size of 0.9 textwidth
     }
 )
 # I make my own newfig and savefig functions

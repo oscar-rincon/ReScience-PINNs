@@ -1,0 +1,14 @@
+name: ReScience-PINNs-env
+channels:
+  - conda-forge
+  - pypi
+  - defaults
+dependencies:
+  - python=3.12.3
+  - numpy=1.26.4 
+  - scipy=1.13.1 
+  - matplotlib=3.8.4 
+  - pyDOE=0.3.8 
+  - tensorflow=2.16.1
+   
+ 
