@@ -97,15 +97,44 @@ def train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt
         optimizer.step()
         lambda_1s.append(lambda_1.item())
         lambda_2s.append(lambda_2.item())
-        #pred = model(X_star)
-        #h_pred = (pred[:, 0]**2 + pred[:, 1]**2)**0.5
-        #error = np.linalg.norm(h_star-h_pred.detach().numpy(),2)/np.linalg.norm(h_star,2) 
-        #results.append([iter, loss.item(), error])
+        error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)*100
+        error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.01)/0.01 * 100
+        results.append([iter, loss.item(), error_lambda_1,error_lambda_2])
         iter += 1
         if iter % 1 == 0:
-            #torch.save(model.state_dict(), f'models_iters/pt_model_Schrodinger_{iter}.pt')
-            #print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
-            print(f"Loss: {loss.item()}")
+            torch.save(model.state_dict(), f'models/pt_model_NS_{iter}.pt')
+            print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error_lambda_1} - L2: {error_lambda_2}")
+            
+
+def train_lbfgs(model,x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000):
+    optimizer = torch.optim.LBFGS(model.parameters(),
+                                    lr=1,
+                                    max_iter=num_iter,
+                                    max_eval=num_iter,
+                                    tolerance_grad=1e-5,
+                                    history_size=50,
+                                    tolerance_change=1.0 * np.finfo(float).eps,
+                                    line_search_fn="strong_wolfe")
+ 
+    closure_fn = partial(closure, model, optimizer, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000)
+    optimizer.step(closure_fn)
+
+def closure(model, optimizer, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000):
+    optimizer.zero_grad()
+    loss = mse(model,x_train_pt, y_train_pt, t_train_pt,u_train_pt,v_train_pt)
+    loss.backward(retain_graph=True)
+    global iter
+    iter += 1
+    lambda_1s.append(lambda_1.item())
+    lambda_2s.append(lambda_2.item())
+    error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)*100
+    error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.01)/0.01 * 100
+    results.append([iter, loss.item(), error_lambda_1,error_lambda_2])
+    if iter % 100 == 0:
+        torch.save(model.state_dict(), f'models_iters/pt_model_Schrodinger_{iter}.pt')
+        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error_lambda_1} - L2: {error_lambda_2}")
+    return loss
+
 
 def plot_solution(X_star, u_star, index):
     
@@ -137,7 +166,7 @@ if __name__== "__main__":
     iter = 0
     
     N_train = 5000
-
+    results = []
     
     # Load Data
     data = scipy.io.loadmat('../Data/cylinder_nektar_wake.mat')
