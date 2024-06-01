@@ -101,7 +101,7 @@ def train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt
         error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.01)/0.01 * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
         iter += 1
-        if iter % 1 == 0:
+        if iter % 10 == 0:
             torch.save(model.state_dict(), f'models/pt_model_NS_clean_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {error_lambda_1.item()} - l2: {error_lambda_2.item()}")
             
@@ -130,8 +130,8 @@ def closure(model, optimizer, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_
     error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)*100
     error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.01)/0.01 * 100
     results.append([iter, loss.item(), error_lambda_1.item(),error_lambda_2.item()])
-    if iter % 100 == 0:
-        torch.save(model.state_dict(), f'models_iters/pt_model_NS_clean_{iter}.pt')
+    if iter % 10 == 0:
+        torch.save(model.state_dict(), f'models/pt_model_NS_clean_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l2: {error_lambda_1.item()} - l2: {error_lambda_2.item()}")
     return loss
 
@@ -229,14 +229,14 @@ if __name__== "__main__":
     
     # Entrenamiento con Adam
     start_time_adam = time.time()
-    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=1)
+    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
     
     # Entrenamiento con LBFGS
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=1)
+    train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
