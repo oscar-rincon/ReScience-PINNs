@@ -10,5 +10,6 @@ dependencies:
   - matplotlib=3.8.4 
   - pyDOE=0.3.8 
   - tensorflow=2.16.1
-   
- 
+  - pytorch=2.3.0
+  - pandas=2.2.2
+  - imageio=2.34.1

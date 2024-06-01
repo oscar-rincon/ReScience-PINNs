@@ -6,7 +6,7 @@ The aim of this project was to:
 
 - Reproduce the results from Raissi et al. (2019) using the Python libraries Tensorflow 2x and PyTorch. 
 - Save the models obtained from the training presented in the article.
-- Create Jupyter notebooks including the stored models, to facilitate exploration of the program's variables and functions. 
+- Visualize the training process with GIFs, Loss curves and L2 curves. 
 
 ## Repository Organisation
 
@@ -18,7 +18,7 @@ The aim of this project was to:
 - `continuous_time_identification (Navier-Stokes)/`: Results corresponding the the 4.1.1. Example (Navier–Stokes equation).
 - `discrete_time_identification (KdV)/`: Results corresponding the the 4.2.1. Example (Korteweg–de Vries equation).
 
-Each example contains the complete codes (`_tf.py` and `_pt.py`), figures (`figures_tf/` and `figures_pt/`) and the models (`models_tf/` and `models_pt/`).  
+Each example contains the main and plotting codes (`_tf.py` and `_pt.py`), figures (`figures_tf/` and `figures_pt/`) and the models (`models_tf/` and `models_pt/`).  
 
 ## Installation
 
@@ -41,7 +41,7 @@ Go to the `ReScience-PINNs/` folder and run the following command to install the
 conda env update --name ReScience-PINNs-env --file ReScience-PINNs.yaml
  ```
 
-We include also include a file with the corresponding depentencies requiered to run the original code (`ReScience-PINNs-tf1.yaml`).
+We include a file with the corresponding depentencies requiered to run the original code with tensorflow 1 (`ReScience-PINNs-tf1.yaml`).
   
 To verify the packages installed in your `ReScience-PINNs-env` conda environment, you can use the following command:
 
@@ -49,15 +49,16 @@ To verify the packages installed in your `ReScience-PINNs-env` conda environment
 conda list -n ReScience-PINNs-env
  ```
 
+  ## Instructions
+
  ## Computation times
 
  
 |    Programa   | Tensorflow 2 | PyTorch |
 |---------------|--------------|---------|
-| Schrodinger   |              |         |
+| Schrodinger   |              |    534.03 +     |
 |      AC       |              |         |
 | Navier-Stokes |              |         |
 |      KdV      |              |         |
  
 
-  ## Instructions
