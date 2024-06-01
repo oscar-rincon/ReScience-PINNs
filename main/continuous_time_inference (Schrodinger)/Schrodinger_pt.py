@@ -104,7 +104,7 @@ def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
 
-def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=10_000):
+def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
     global iter
      
@@ -122,7 +122,7 @@ def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=10_000):
             torch.save(model.state_dict(), f'models_iters/pt_model_Schrodinger_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
 
-def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=10_000):
+def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
     optimizer = torch.optim.LBFGS(model.parameters(),
                                     lr=1,
                                     max_iter=num_iter,
@@ -175,7 +175,7 @@ if __name__== "__main__":
     idx_b = np.random.choice(t.shape[0], N_b, replace=False)
     t_b = t[idx_b]
     
-    X, T = torch.meshgrid(torch.tensor(data['tt'].flatten()[:]), torch.tensor(data['x'].flatten()[:]))
+    X, T = torch.meshgrid(torch.tensor(data['x'].flatten()[:]), torch.tensor(data['tt'].flatten()[:]))
     xcol = X.reshape(-1, 1)
     tcol = T.reshape(-1, 1)
     X_star = torch.cat((xcol, tcol), 1).float()   
@@ -191,13 +191,13 @@ if __name__== "__main__":
     results = []
 
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=500)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=10_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=500)
+    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -214,8 +214,3 @@ if __name__== "__main__":
     results = np.array(results)
     np.savetxt("outputs/pt_training_Schrodinger.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
     torch.save(model.state_dict(), f'outputs/pt_model_Schrodinger.pt')
-
-     
-    
-    
- 

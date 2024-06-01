@@ -4,7 +4,7 @@ This project is a replication of ''Physics-informed neural networks: A deep lear
 
 The aim of this project was to:
 
-- Reproduce the results from Raissi et al. (2019) using the Python libraries Tensorflow 2x and PyTorch. 
+- Reproduce the results from Raissi et al. (2019) using the Python library PyTorch. 
 - Save the models obtained from the training presented in the article.
 - Visualize the training process with GIFs, Loss curves and L2 curves. 
 
@@ -18,7 +18,7 @@ The aim of this project was to:
 - `continuous_time_identification (Navier-Stokes)/`: Results corresponding the the 4.1.1. Example (Navier–Stokes equation).
 - `discrete_time_identification (KdV)/`: Results corresponding the the 4.2.1. Example (Korteweg–de Vries equation).
 
-Each example contains the main and plotting codes (`_tf.py` and `_pt.py`), figures (`figures_tf/` and `figures_pt/`) and the models (`models_tf/` and `models_pt/`).  
+Each example contains the main and plotting codes (`_pt.py`), figures (`figures_pt/`) and the models (`models_pt/`).  
 
 ## Installation
 
@@ -54,11 +54,11 @@ conda list -n ReScience-PINNs-env
  ## Computation times
 
  
-|    Programa   | Tensorflow 2 | PyTorch |
-|---------------|--------------|---------|
-| Schrodinger   |              |    534.03 +     |
-|      AC       |              |         |
-| Navier-Stokes |              |         |
-|      KdV      |              |         |
+|    Programa   |  PyTorch |
+|---------------|----------|
+| Schrodinger   |          |
+|      AC       |          |
+| Navier-Stokes |          |
+|      KdV      |          |
  
 

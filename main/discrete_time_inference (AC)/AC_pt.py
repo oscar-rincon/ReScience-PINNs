@@ -71,7 +71,7 @@ def closure(model, optimizer, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1,
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
 
-def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results, num_iter=10_000):
+def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results, num_iter=50_000):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
     global iter
     for i in range(1,num_iter+1):
@@ -152,14 +152,22 @@ if __name__ == "__main__":
     total_training_time = adam_training_time + lbfgs_training_time
     print(f"Total training time: {total_training_time:.2f} seconds")
 
-    # Guardar los tiempos en un archivo de texto
-    with open('outputs/training_times.txt', 'w') as file:
+    # Obtener el valor del loss L2 final
+    final_loss = results[-1][1]
+    print(f"Final Loss: {final_loss:.6f}")
+
+    # Obtener el valor del loss L2 final
+    final_l2 = results[-1][2]
+    print(f"Final L2: {final_l2:.6f}")
+
+    # Guardar los tiempos en un archivo de texto junto con el loss L2 final
+    with open('outputs/training_info.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Final L2: {final_loss:.6f}\n")
+        file.write(f"Final L2: {final_l2:.6f}\n")
              
     results = np.array(results)
     np.savetxt("outputs/pt_training_AC.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
     torch.save(model.state_dict(), f'outputs/pt_model_AC.pt')
-    
-    

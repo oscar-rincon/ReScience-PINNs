@@ -87,7 +87,7 @@ h_0 = h_0[idx_0]
 idx_b = np.random.choice(t.shape[0], N_b, replace=False)
 t_b = t[idx_b]
 
-X, T = torch.meshgrid(torch.tensor(data['tt'].flatten()[:]), torch.tensor(data['x'].flatten()[:]))
+X, T = torch.meshgrid(torch.tensor(data['x'].flatten()[:]), torch.tensor(data['tt'].flatten()[:]))
 xcol = X.reshape(-1, 1)
 tcol = T.reshape(-1, 1)
 X_star = torch.cat((xcol, tcol), 1).float()   
@@ -96,14 +96,19 @@ Exact_u = np.real(Exact)
 Exact_v = np.imag(Exact)
 Exact_h = np.sqrt(Exact_u**2 + Exact_v**2) 
 h_star = Exact_h.flatten()[:] 
+
+t = data['tt'].flatten()[:,None]
+x = data['x'].flatten()[:,None]
+idx_x = np.random.choice(x.shape[0], N0, replace=False)
+idx_t = np.random.choice(t.shape[0], N_b, replace=False)
     
 # Generate images for GIF
 mat_file = '../Data/NLS.mat'
 model_dir = 'models_iters/'
-image_dir = 'outputs/'
-gif_filename = 'pt_Schrodinger.gif'
+image_dir = 'figs/'
+gif_filename = 'outputs/pt_Schrodinger.gif'
 
-for i in range(100, 201, 100):
+for i in range(100, 3600, 100):
     model = SchrodingerNN()
     model_path = os.path.join(model_dir, f'pt_model_Schrodinger_{i}.pt')
     model.load_state_dict(torch.load(model_path))
@@ -116,13 +121,13 @@ for i in range(100, 201, 100):
         h_pred = (usol[:, 0]**2 + usol[:, 1]**2)**0.5
         u_pred = usol[:, 0]
         v_pred = usol[:, 1]
-        t = torch.tensor(data['tt'].flatten()[:])
-        x = torch.tensor(data['x'].flatten()[:])
-        U = h_pred.reshape(x.numel(), t.numel())
+        t_tf = torch.tensor(data['tt'].flatten()[:])
+        x_tf = torch.tensor(data['x'].flatten()[:])
+        U = h_pred.reshape(x_tf.numel(), t_tf.numel())
         Unp = U.detach().numpy()
 
         
-        X, T = torch.meshgrid(t, x)        
+        X, T = torch.meshgrid(x_tf, t_tf)        
         u_star = Exact_u.T.flatten()[:,None]
         v_star = Exact_v.T.flatten()[:,None]
         h_star = Exact_h.T.flatten()[:,None]
@@ -130,16 +135,15 @@ for i in range(100, 201, 100):
         ###########################
         t = data['tt'].flatten()[:,None]
         x = data['x'].flatten()[:,None]
-        idx_x = np.random.choice(x.shape[0], N0, replace=False)
+        #idx_x = np.random.choice(x.shape[0], N0, replace=False)
         x0 = x[idx_x,:]
         u0 = Exact_u[idx_x,0:1]
         v0 = Exact_v[idx_x,0:1]
 
-        idx_t = np.random.choice(t.shape[0], N_b, replace=False)
+        #idx_t = np.random.choice(t.shape[0], N_b, replace=False)
         tb = t[idx_t,:]
 
         X_f = lb + (ub-lb)*lhs(2, N_f)
-
 
         U_pred = griddata(X_star, u_pred.detach().numpy().flatten(), (X, T), method='cubic')
         V_pred = griddata(X_star, v_pred.detach().numpy().flatten(), (X, T), method='cubic')
@@ -223,7 +227,7 @@ for i in range(100, 201, 100):
 
 # Create GIF
 images = []
-for i in range(100, 201, 100):
+for i in range(100, 3600, 100):
     image_path = os.path.join(image_dir, f'model_{i}.png')
     images.append(imageio.imread(image_path))
 
