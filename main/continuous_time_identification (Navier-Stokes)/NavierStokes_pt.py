@@ -99,11 +99,11 @@ def train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt
         lambda_2s.append(lambda_2.item())
         error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)*100
         error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.01)/0.01 * 100
-        results.append([iter, loss.item(), error_lambda_1,error_lambda_2])
+        results.append([iter, loss.item(), lambda_1,lambda_2])
         iter += 1
         if iter % 1 == 0:
             torch.save(model.state_dict(), f'models/pt_model_NS_{iter}.pt')
-            print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error_lambda_1} - L2: {error_lambda_2}")
+            print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {lambda_1} - L2: {lambda_2}")
             
 
 def train_lbfgs(model,x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000):
@@ -132,7 +132,7 @@ def closure(model, optimizer, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_
     results.append([iter, loss.item(), error_lambda_1,error_lambda_2])
     if iter % 100 == 0:
         torch.save(model.state_dict(), f'models_iters/pt_model_Schrodinger_{iter}.pt')
-        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error_lambda_1} - L2: {error_lambda_2}")
+        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {lambda_1} - L2: {lambda_2}")
     return loss
 
 
@@ -465,4 +465,4 @@ if __name__== "__main__":
  
     ax.text(0.015,0.4,s)
     
-    savefig('./figures/NavierStokes_prediction_')         
+    savefig('./figures/NavierStokes_prediction_pt')         

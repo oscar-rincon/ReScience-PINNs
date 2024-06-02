@@ -165,7 +165,7 @@ if __name__ == "__main__":
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
-        file.write(f"Final L2: {final_loss:.6f}\n")
+        file.write(f"Final Loss: {final_loss:.6f}\n")
         file.write(f"Final L2: {final_l2:.6f}\n")
              
     results = np.array(results)

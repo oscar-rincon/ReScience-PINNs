@@ -10,6 +10,7 @@ import matplotlib.gridspec as gridspec
 from itertools import product, combinations
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import imageio
+import pandas as pd
 import sys
 sys.path.insert(0, '../../Utilities/')
 #from utils_plots import * 
@@ -73,7 +74,7 @@ def axisEqual3D(ax):
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
         
-def f(model, x_train_pt, y_train_pt, t_train_pt):
+def f(model, x_train_pt, y_train_pt, t_train_pt,lambda_1,lambda_2):
     psi_and_p = model(torch.stack((x_train_pt, y_train_pt, t_train_pt), axis = 1).view(-1, 3))
     psi = psi_and_p[:,0:1]
     p = psi_and_p[:,1:2]
@@ -155,14 +156,24 @@ t_train_pt.requires_grad = True
 u_train_pt = torch.from_numpy(u_train)
 v_train_pt = torch.from_numpy(v_train)
 
-lambda_1 = torch.nn.Parameter(torch.zeros(1, requires_grad=True))
-lambda_2 = torch.nn.Parameter(torch.zeros(1, requires_grad=True))    
-lambda_1s = []
+#lambda_1 = torch.nn.Parameter(torch.zeros(1, requires_grad=True))
+#lambda_2 = torch.nn.Parameter(torch.zeros(1, requires_grad=True))    
+#lambda_1s = []
+lambda_1_values_clean = pd.read_csv('outputs/lambda_1s_clean.csv')
+lambda_2_values_clean = pd.read_csv('outputs/lambda_2s_clean.csv')
+lambda_1_values_noisy = pd.read_csv('outputs/lambda_1s_noisy.csv')
+lambda_2_values_noisy = pd.read_csv('outputs/lambda_2s_noisy.csv')
+
 lambda_2s = []
 images = []
 
 # Cargar y graficar modelos
-for iter_num in range(10, 110, 10):
+for iter_num in range(100, 10_000, 100):
+
+    lambda_1_value=lambda_1_values_clean['l1'][iter_num-1]
+    lambda_2_value=lambda_2_values_clean['l2'][iter_num-1]
+    lambda_1_value_noisy=lambda_1_values_noisy['l1'][iter_num-1]
+    lambda_2_value_noisy=lambda_2_values_noisy['l2'][iter_num-1]
 
     model_path = f'models/pt_model_NS_clean_{iter_num}.pt'
     model = NSNN()
@@ -186,17 +197,17 @@ for iter_num in range(10, 110, 10):
     t_star_pt = torch.from_numpy(t_star)
     t_star_pt.requires_grad = True    
 
-    u_pred, v_pred, p_pred, f_u_pred, f_v_pred = f(model, x_star_pt, y_star_pt, t_star_pt) 
+    u_pred, v_pred, p_pred, f_u_pred, f_v_pred = f(model, x_star_pt, y_star_pt, t_star_pt,lambda_1_value,lambda_2_value) 
     u_pred = u_pred.detach().numpy()
     v_pred = v_pred.detach().numpy()
     p_pred = p_pred.detach().numpy()
-    lambda_1_value = lambda_1.detach().numpy()   
-    lambda_2_value = lambda_2.detach().numpy()   
+    #lambda_1_value = lambda_1.detach().numpy()   
+    #lambda_2_value = lambda_2.detach().numpy()   
     error_u = np.linalg.norm(u_star-u_pred,2)/np.linalg.norm(u_star,2)
     error_v = np.linalg.norm(v_star-v_pred,2)/np.linalg.norm(v_star,2)
     error_p = np.linalg.norm(p_star-p_pred,2)/np.linalg.norm(p_star,2)    
-    error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)*100
-    error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.01)/0.01 * 100
+    error_lambda_1 = np.abs(lambda_1_value - 1.0)*100
+    error_lambda_2 = np.abs(lambda_2_value - 0.01)/0.01 * 100
             
     #print('Error u: %e' % (error_u))    
     #print('Error v: %e' % (error_v))    
@@ -221,24 +232,24 @@ for iter_num in range(10, 110, 10):
     ######################################################################
     ########################### Noisy Data ###############################
     ######################################################################
-    noise = 0.01        
-    u_train = u_train + noise*np.std(u_train)*np.random.randn(u_train.shape[0], u_train.shape[1])
-    v_train = v_train + noise*np.std(v_train)*np.random.randn(v_train.shape[0], v_train.shape[1])    
-    u_train_pt = torch.from_numpy(u_train)
-    v_train_pt = torch.from_numpy(v_train)
+    #noise = 0.01        
+    #u_train = u_train + noise*np.std(u_train)*np.random.randn(u_train.shape[0], u_train.shape[1])
+    #v_train = v_train + noise*np.std(v_train)*np.random.randn(v_train.shape[0], v_train.shape[1])    
+    #u_train_pt = torch.from_numpy(u_train)
+    #v_train_pt = torch.from_numpy(v_train)
     # Training
     
-    model_path = f'models/pt_model_NS_noisy_{iter_num}.pt'
-    model = NSNN()
-    model.load_state_dict(torch.load(model_path))
-    model.eval()
+    #model_path = f'models/pt_model_NS_noisy_{iter_num}.pt'
+    #model = NSNN()
+    #model.load_state_dict(torch.load(model_path))
+    #model.eval()
 
         
-    lambda_1_value_noisy = lambda_1.detach().numpy()   
-    lambda_2_value_noisy = lambda_2.detach().numpy()   
+    #lambda_1_value_noisy = lambda_1.detach().numpy()   
+    #lambda_2_value_noisy = lambda_2.detach().numpy()   
         
-    error_lambda_1_noisy = np.abs(lambda_1_value_noisy - 1.0)*100
-    error_lambda_2_noisy = np.abs(lambda_2_value_noisy - 0.01)/0.01 * 100
+    #error_lambda_1_noisy = np.abs(lambda_1_value_noisy - 1.0)*100
+    #error_lambda_2_noisy = np.abs(lambda_2_value_noisy - 0.01)/0.01 * 100
         
     #print('Error l1: %.5f%%' % (error_lambda_1_noisy))                             
     #print('Error l2: %.5f%%' % (error_lambda_2_noisy))  
@@ -412,7 +423,7 @@ for iter_num in range(10, 110, 10):
     plt.savefig(image_filename)
     images.append(image_filename)    
 # Crear el GIF
-with imageio.get_writer('outputs/pt_AC.gif', mode='I', duration=0.5) as writer:
+with imageio.get_writer('outputs/pt_NS.gif', mode='I', duration=0.5) as writer:
     for filename in images:
         image = imageio.imread(filename)
         writer.append_data(image)

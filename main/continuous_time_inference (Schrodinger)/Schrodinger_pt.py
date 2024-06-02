@@ -191,13 +191,13 @@ if __name__== "__main__":
     results = []
 
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=10_000)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=5_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
+    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=5_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -205,11 +205,17 @@ if __name__== "__main__":
     total_training_time = adam_training_time + lbfgs_training_time
     print(f"Total training time: {total_training_time:.2f} seconds")
 
-    # Guardar los tiempos en un archivo de texto
-    with open('outputs/training_times.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+    # Obtener el valor del loss L2 final
+    final_loss = results[-1][1]
+    print(f"Final Loss: {final_loss:.6f}")
+
+    # Obtener el valor del loss L2 final
+    final_l2 = results[-1][2]
+    print(f"Final L2: {final_l2:.6f}")
+
+    # Guardar los tiempos en un archivo de texto junto con el loss L2 final
+    with open('outputs/training_info.txt', 'w') as file:
+        file.write(f"Adam tra
 
     results = np.array(results)
     np.savetxt("outputs/pt_training_Schrodinger.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
