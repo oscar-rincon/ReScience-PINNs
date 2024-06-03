@@ -4,9 +4,9 @@ This project is a replication of ''Physics-informed neural networks: A deep lear
 
 The aim of this project was to:
 
-- Reproduce the results from Raissi et al. (2019) using the Python library PyTorch. 
+- Reproduce the figures from the main manuscript of Raissi et al. (2019) using the Python library PyTorch. 
 - Save the models obtained from the training presented in the article.
-- Visualize the training process with GIFs, Loss curves and L2 curves. 
+- Record training information such as computing times and the accuracy achieved.
 
 ## Repository Organisation
 
@@ -18,7 +18,7 @@ The aim of this project was to:
 - `continuous_time_identification (Navier-Stokes)/`: Results corresponding the the 4.1.1. Example (Navier–Stokes equation).
 - `discrete_time_identification (KdV)/`: Results corresponding the the 4.2.1. Example (Korteweg–de Vries equation).
 
-Each example contains the main and plotting codes (`_pt.py`), figures (`figures_pt/`) and the models (`models_pt/`).  
+Each example contains the main and plotting codes, figures (`figures/`), model (`model/`) and summary information about the training process (`training/`).  
 
 ## Installation
 
@@ -41,24 +41,11 @@ Go to the `ReScience-PINNs/` folder and run the following command to install the
 conda env update --name ReScience-PINNs-env --file ReScience-PINNs.yaml
  ```
 
-We include a file with the corresponding depentencies requiered to run the original code with tensorflow 1 (`ReScience-PINNs-tf1.yaml`).
-  
 To verify the packages installed in your `ReScience-PINNs-env` conda environment, you can use the following command:
 
  ```
 conda list -n ReScience-PINNs-env
  ```
 
-  ## Instructions
-
- ## Computation times
-
- 
-|    Programa   |  PyTorch |
-|---------------|----------|
-| Schrodinger   |          |
-|      AC       |          |
-| Navier-Stokes |          |
-|      KdV      |          |
  
 
