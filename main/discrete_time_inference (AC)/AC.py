@@ -89,7 +89,6 @@ def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results
             torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
             print(f"Adam - Iter: {i} - Loss: {loss.item()} - L2: {error}")
           
-
 def train_lbfgs(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results, num_iter=50_000):
     optimizer = torch.optim.LBFGS(model.parameters(),
                                   max_iter=num_iter,
