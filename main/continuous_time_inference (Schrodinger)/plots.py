@@ -45,16 +45,15 @@ data = pd.read_csv('training/Schrodinger_training_data.csv')
 plt.figure(figsize=(6.5, 2.5))
 
 plt.subplot(1, 2, 1)
-plt.semilogy(data['Iter'], data['Loss'], label='Loss', linewidth=2)
+plt.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 
 plt.subplot(1, 2, 2)
-plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='red', linewidth=2)
+plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=2)
 plt.xlabel('Iteration')
 plt.ylabel('$L_{2}$')
 
-savefig('figures/Schrodinger_training_curves.png')
 savefig('figures/Schrodinger_training_curves.pdf')
 
 
@@ -115,7 +114,7 @@ model_dir = 'models_iterations/'
 image_dir = 'figures_iterations/'
 gif_filename = 'figures/Schrodinger.gif'
 
-for i in range(1000, 120_001, 100):
+for i in range(1000, 120_001, 1000):
     model = SchrodingerNN()
     model_path = os.path.join(model_dir, f'Schrodinger_{i}.pt')
     model.load_state_dict(torch.load(model_path))
@@ -234,7 +233,7 @@ for i in range(1000, 120_001, 100):
 
 # Create GIF
 images = []
-for i in range(1000, 120_001, 100):
+for i in range(1000, 120_001, 1000):
     image_path = os.path.join(image_dir, f'Schrodinger_{i}.png')
     images.append(imageio.imread(image_path))
 

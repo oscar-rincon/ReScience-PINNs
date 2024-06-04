@@ -38,19 +38,19 @@ class ACNN(nn.Module):
 
 data = pd.read_csv('training/AC_training_data.csv')
 
-plt.figure(figsize=(6.5, 2.5))
+plt.figure(figsize=(7.8, 2.5))
 
 plt.subplot(1, 2, 1)
-plt.semilogy(data['Iter'], data['Loss'], label='Loss', linewidth=2)
+plt.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 
 plt.subplot(1, 2, 2)
-plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='red', linewidth=2)
+plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=2)
 plt.xlabel('Iteration')
 plt.ylabel('$L_{2}$')
 
-plt.savefig('figures/AC_training_curves.png')
+savefig('figures/AC_training_curves.pdf')
 
 
 
@@ -138,8 +138,8 @@ savefig(image_filename)
 
 images = []
 # Cargar y graficar modelos
-for iter_num in range(100, 60_000, 100):
-    model_path = f'model/AC_{iter_num}.pt'
+for iter_num in range(1000, 121_000, 1000):
+    model_path = f'models_iters/AC_{iter_num}.pt'
     model = ACNN()
     model.load_state_dict(torch.load(model_path))
     model.eval()

@@ -5,7 +5,6 @@ import numpy as np
 import scipy.io
 from functools import partial
 from pyDOE import lhs
-import time
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -14,9 +13,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import imageio
 import pandas as pd
 import sys
-sys.path.insert(0, '../../Utilities/')
-#from utils_plots import * 
-from plotting import *#newfig, savefig
+sys.path.insert(0, '../../Utilities/') 
+from plotting import *
 sys.path.insert(0, '.')
 import warnings
 
@@ -37,7 +35,6 @@ ax.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
 ax.set_xlabel('Iteration')
 ax.set_ylabel('Loss')
 
-savefig('figures/NS_clean_loss_curve.png')
 savefig('figures/NS_clean_loss_curve.pdf')
 
 
@@ -59,7 +56,6 @@ axs[1].set_ylabel(r'$\lambda_{2}$ Error ($\%$)')
 plt.tight_layout()
 
 # Guardar la figura en diferentes formatos
-plt.savefig('figures/NS_clean_error_curves.png')
 plt.savefig('figures/NS_clean_error_curves.pdf')
 
 
@@ -71,7 +67,6 @@ ax.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
 ax.set_xlabel('Iteration')
 ax.set_ylabel('Loss')
 
-savefig('figures/NS_noisy_loss_curve.png')
 savefig('figures/NS_noisy_loss_curve.pdf')
 
 # Configuración de la figura
@@ -92,7 +87,6 @@ axs[1].set_ylabel(r'$\lambda_{2}$ Error ($\%$)')
 plt.tight_layout()
 
 # Guardar la figura en diferentes formatos
-plt.savefig('figures/NS_noisy_error_curves.png')
 plt.savefig('figures/NS_noisy_error_curves.pdf')
 
 
