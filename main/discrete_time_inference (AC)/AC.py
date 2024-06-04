@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import numpy as np
@@ -66,8 +67,8 @@ def closure(model, optimizer, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1,
     pred = U1_pred[:, -1].detach().numpy()
     error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)
     results.append([iter, loss.item(), error])
-    if iter % 100 == 0:
-        torch.save(model.state_dict(), f'model/AC_{iter}.pt')
+    if iter % 1000 == 0:
+        torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
 
@@ -84,8 +85,8 @@ def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results
         pred = U1_pred[:, -1].detach().numpy()
         error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)        
         results.append([iter, loss.item(), error])
-        if i % 100 == 0:
-            torch.save(model.state_dict(), f'model/AC_{iter}.pt')
+        if i % 1000 == 0:
+            torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
             print(f"Adam - Iter: {i} - Loss: {loss.item()} - L2: {error}")
           
 
@@ -134,16 +135,22 @@ if __name__ == "__main__":
     model.train()
     results = []
 
+    if not os.path.exists('models_iters'):
+        os.makedirs('models_iters')
+
+    if not os.path.exists('training'):
+        os.makedirs('training')
+
     # Entrenamiento con Adam
     start_time_adam = time.time()
-    train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=10_000)
+    train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=20_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
     
     # Entrenamiento con LBFGS
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=50_000)
+    train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=100_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -170,4 +177,4 @@ if __name__ == "__main__":
              
     results = np.array(results)
     np.savetxt("training/AC_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
-    torch.save(model.state_dict(), f'model/AC.pt')
+    torch.save(model.state_dict(), f'AC.pt')

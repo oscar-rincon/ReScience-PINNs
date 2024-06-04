@@ -5,8 +5,8 @@ This project is a replication of ''Physics-informed neural networks: A deep lear
 The aim of this project was to:
 
 - Reproduce the figures from the main manuscript of Raissi et al. (2019) using the Python library PyTorch. 
-- Save the models obtained from the training presented in the article.
-- Record training information such as computing times and the accuracy achieved.
+- Save the models obtained from the training.
+- Record training information such as computing times and accuracy.
 
 ## Repository Organisation
 
@@ -18,7 +18,7 @@ The aim of this project was to:
 - `continuous_time_identification (Navier-Stokes)/`: Results corresponding the the 4.1.1. Example (Navier–Stokes equation).
 - `discrete_time_identification (KdV)/`: Results corresponding the the 4.2.1. Example (Korteweg–de Vries equation).
 
-Each example contains the main and plotting codes, figures (`figures/`), model (`model/`) and summary information about the training process (`training/`).  
+Each example contains the main and plotting codes, figures (`figures/`), model (.pt`) and summary information about the training process (`training/`).  
 
 ## Installation
 

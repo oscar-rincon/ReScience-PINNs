@@ -8,12 +8,18 @@ import warnings
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.gridspec as gridspec
-from utils_plots import * 
+from plotting import * 
 import imageio
 import os 
  
 warnings.filterwarnings("ignore")
+
+if not os.path.exists('figures'):
+    os.makedirs('figures')
+    
+if not os.path.exists('figures_iters'):
+    os.makedirs('figures_iters')    
+
 
 class ACNN(nn.Module):
     def __init__(self):
@@ -30,7 +36,7 @@ class ACNN(nn.Module):
         x = self.linear_out(x)
         return x
 
-data = pd.read_csv('outputs/pt_training_AC.csv')
+data = pd.read_csv('training/AC_training_data.csv')
 
 plt.figure(figsize=(6.5, 2.5))
 
@@ -44,7 +50,9 @@ plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='red', linewidth=
 plt.xlabel('Iteration')
 plt.ylabel('$L_{2}$')
 
-plt.savefig('training/AC_training_curves.png')
+plt.savefig('figures/AC_training_curves.png')
+
+
 
 q = 100
 lb = np.array([-1.0], dtype=np.float64)
@@ -72,6 +80,61 @@ x1.requires_grad = True
 tmp = np.loadtxt('../../Utilities/IRK_weights/Butcher_IRK%d.txt' % (q), ndmin=2).astype(np.float64)
 IRK_weights = torch.from_numpy(np.reshape(tmp[0:q**2+q], (q+1, q))).to(torch.float64).T
 x_star = torch.from_numpy(x).to(torch.float64)
+
+
+
+model_path = f'AC.pt'
+model = ACNN()
+model.load_state_dict(torch.load(model_path))
+model.eval()
+U1_pred = model(x_star)
+
+fig, ax = newfig(1.0, 1.2)
+ax.axis('off')
+
+gs0 = plt.GridSpec(1, 2)
+gs0.update(top=1-0.06, bottom=1-1/2 + 0.1, left=0.15, right=0.85, wspace=0)
+ax = plt.subplot(gs0[:, :])
+
+h = ax.imshow(Exact.T, interpolation='nearest', cmap='seismic',
+                extent=[t.min(), t.max(), x_star.min(), x_star.max()],
+                origin='lower', aspect='auto')
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+fig.colorbar(h, cax=cax)
+
+line = np.linspace(x.min(), x.max(), 2)[:, None]
+ax.plot(t[idx_t0]*np.ones((2, 1)), line, 'w-', linewidth=1)
+ax.plot(t[idx_t1]*np.ones((2, 1)), line, 'w-', linewidth=1)
+
+ax.set_xlabel('$t$')
+ax.set_ylabel('$x$')
+ax.set_title('$u(t,x)$', fontsize=10)
+
+gs1 = plt.GridSpec(1, 2)
+gs1.update(top=1-1/2-0.05, bottom=0.15, left=0.15, right=0.85, wspace=0.5)
+
+ax = plt.subplot(gs1[0, 0])
+ax.plot(x,Exact[idx_t0,:], 'b-', linewidth = 2) 
+ax.plot(x0.detach().numpy(), u0.detach().numpy(), 'rx', linewidth = 2, label = 'Data')      
+ax.set_xlabel('$x$')
+ax.set_ylabel('$u(t,x)$')    
+ax.set_title('$t = %.2f$' % (t[idx_t0]), fontsize = 10)
+ax.set_xlim([lb-0.1, ub+0.1])
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, frameon=False)
+
+
+ax = plt.subplot(gs1[0, 1])
+ax.plot(x, Exact[idx_t1, :], 'b-', linewidth=2, label='Exact')
+ax.plot(x_star.detach().numpy(), U1_pred[:, -1].detach().numpy(), 'r--', linewidth=2, label='Prediction')
+ax.set_xlabel('$x$')
+ax.set_ylabel('$u(t,x)$')
+ax.set_title('$t = %.2f$' % (t[idx_t1]), fontsize=10)
+ax.set_xlim([lb-0.1, ub+0.1])
+ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
+
+image_filename = f'figures/AC.pdf'
+savefig(image_filename)
 
 images = []
 # Cargar y graficar modelos
@@ -126,7 +189,7 @@ for iter_num in range(100, 60_000, 100):
     ax.set_xlim([lb-0.1, ub+0.1])
     ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
     
-    image_filename = f'figures/AC_{iter_num}.png'
+    image_filename = f'figures_iters/AC_{iter_num}.png'
     savefig(image_filename)
     images.append(image_filename)
     

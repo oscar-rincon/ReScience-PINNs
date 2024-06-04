@@ -1,3 +1,4 @@
+import os 
 import torch 
 import torch.nn as nn
 import numpy as np
@@ -223,6 +224,12 @@ if __name__== "__main__":
     lambda_2 = torch.nn.Parameter(torch.zeros(1, requires_grad=True))    
     lambda_1s = []
     lambda_2s = []
+
+    if not os.path.exists('models_iters'):
+        os.makedirs('models_iters')
+
+    if not os.path.exists('training'):
+        os.makedirs('training')
     
     model = NSNN()
     model.apply(init_weights)  
@@ -267,7 +274,7 @@ if __name__== "__main__":
     np.savetxt("training/NS_training_data_clean.csv", results, delimiter=",", header="Iter,Loss,l1,l2", comments="")
     np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="l1", comments="")    
     np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")    
-    torch.save(model.state_dict(), f'model/NS_clean.pt')
+    torch.save(model.state_dict(), f'NS_clean.pt')
 
     
     # Test Data

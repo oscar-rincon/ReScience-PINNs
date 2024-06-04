@@ -49,11 +49,11 @@ def newfig(width, nplots = 1):
 def savefig(filename, crop = True):
     if crop == True:
 #        plt.savefig('{}.pgf'.format(filename), bbox_inches='tight', pad_inches=0)
-        plt.savefig('{}.pdf'.format(filename), bbox_inches='tight', pad_inches=0)
+        plt.savefig('{}'.format(filename), bbox_inches='tight', pad_inches=0)
         #plt.savefig('{}.eps'.format(filename), bbox_inches='tight', pad_inches=0)
     else:
 #        plt.savefig('{}.pgf'.format(filename))
-        plt.savefig('{}.pdf'.format(filename))
+        plt.savefig('{}'.format(filename))
         #plt.savefig('{}.eps'.format(filename))
 
 ## Simple plot

@@ -5,6 +5,7 @@ import scipy.io as sp
 from functools import partial
 from pyDOE import lhs
 import time
+import os 
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -189,7 +190,13 @@ if __name__== "__main__":
     model.apply(init_weights)
     
     results = []
+    
+    if not os.path.exists('models_iters'):
+        os.makedirs('models_iters')
 
+    if not os.path.exists('training'):
+        os.makedirs('training')
+        
     start_time_adam = time.time()
     train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=5_000)
     end_time_adam = time.time()
@@ -214,7 +221,7 @@ if __name__== "__main__":
     print(f"Final L2: {final_l2:.6f}")
 
     # Guardar los tiempos en un archivo de texto junto con el loss L2 final
-    with open('training/AC_training_summary.txt', 'w') as file:
+    with open('training/Schrodinger_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
@@ -223,4 +230,4 @@ if __name__== "__main__":
         
     results = np.array(results)
     np.savetxt("training/Schrodinger_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
-    torch.save(model.state_dict(), f'model/Schrodinger.pt')
+    torch.save(model.state_dict(), f'Schrodinger.pt')

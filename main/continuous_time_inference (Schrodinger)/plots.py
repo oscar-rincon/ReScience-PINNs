@@ -18,6 +18,12 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+if not os.path.exists('figures'):
+    os.makedirs('figures')
+    
+if not os.path.exists('figures_iters'):
+    os.makedirs('figures_iters')  
+
 class SchrodingerNN(nn.Module):
     def __init__(self):
         super(SchrodingerNN, self).__init__()
@@ -48,7 +54,8 @@ plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='red', linewidth=
 plt.xlabel('Iteration')
 plt.ylabel('$L_{2}$')
 
-plt.savefig('training/Schrodinger_training_curves.png')
+savefig('figures/Schrodinger_training_curves.png')
+savefig('figures/Schrodinger_training_curves.pdf')
 
 
 lb = np.array([-5.0, 0.0])
@@ -106,9 +113,9 @@ idx_t = np.random.choice(t.shape[0], N_b, replace=False)
 mat_file = '../Data/NLS.mat'
 model_dir = 'models_iterations/'
 image_dir = 'figures_iterations/'
-gif_filename = 'training/Schrodinger.gif'
+gif_filename = 'figures/Schrodinger.gif'
 
-for i in range(100, 10_001, 100):
+for i in range(1000, 120_001, 100):
     model = SchrodingerNN()
     model_path = os.path.join(model_dir, f'Schrodinger_{i}.pt')
     model.load_state_dict(torch.load(model_path))
@@ -227,7 +234,7 @@ for i in range(100, 10_001, 100):
 
 # Create GIF
 images = []
-for i in range(100, 10_001, 100):
+for i in range(1000, 120_001, 100):
     image_path = os.path.join(image_dir, f'Schrodinger_{i}.png')
     images.append(imageio.imread(image_path))
 
