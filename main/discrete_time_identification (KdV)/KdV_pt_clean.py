@@ -43,7 +43,7 @@ class KdVNN(nn.Module):
 def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
-        m.bias.data.fill_(0.0)    
+        m.bias.data.fill_(0.01)    
 
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor):
     z = torch.ones(dy.shape).requires_grad_(True)
@@ -79,7 +79,7 @@ def mse(model, x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta,u0_pt, u1
     return loss
 
 def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000):
-    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-3)
+    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-5)
     global iter
     for i in range(1,num_iter+1):
         iter += 1 

@@ -43,7 +43,7 @@ class KdVNN(nn.Module):
 def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
-        m.bias.data.fill_(0.0)    
+        m.bias.data.fill_(0.01)    
 
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor):
     z = torch.ones(dy.shape).requires_grad_(True)
@@ -79,7 +79,7 @@ def mse(model, x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta, u0_pt, u
     return loss
 
 def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000):
-    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-3)
+    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-5)
     global iter
     for i in range(1,num_iter+1):
         iter += 1 
@@ -88,7 +88,7 @@ def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta,
         loss.backward(retain_graph=True)
         optimizer.step()
         lambda_1s.append(lambda_1.item())
-        lambda_2s.append(lambda_2.item())
+        lambda_2s.append(torch.exp(lambda_2).item())
         error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)/1.0 *100
         error_lambda_2 = np.abs(torch.exp(lambda_2).detach().numpy() - 0.0025)/0.0025 * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
@@ -115,13 +115,13 @@ def closure(model,optimizer,x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha,IRK_be
     global iter
     iter += 1
     lambda_1s.append(lambda_1.item())
-    lambda_2s.append(lambda_2.item())
+    lambda_2s.append(torch.exp(lambda_2).item())
     error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0)/1.0 *100
-    error_lambda_2 = np.abs(lambda_2.detach().numpy() - 0.0025)/0.0025 * 100
+    error_lambda_2 = np.abs(torch.exp(lambda_2).detach().numpy() - 0.0025)/0.0025 * 100
     results.append([iter, loss.item(), error_lambda_1.item(),error_lambda_2.item()])
     if iter % 1000 == 0:
         torch.save(model.state_dict(), f'models_iters/KdV_noisy_{iter}.pt')
-        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.detach().numpy().item()} - l2: {lambda_2.detach().numpy().item()}")
+        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.detach().numpy().item()} - l2: {torch.exp(lambda_2).detach().numpy().item()}")
     return loss    
 
 if __name__ == "__main__":

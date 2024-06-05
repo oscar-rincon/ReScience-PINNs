@@ -15,6 +15,7 @@ import matplotlib.gridspec as gridspec
 from functools import partial
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pandas as pd
+import imageio
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -69,6 +70,10 @@ def net_U1(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     U1 = U + dt*torch.matmul(F, (IRK_beta-IRK_alpha).T)
     return U1 
 
+lambda_1_values_clean = pd.read_csv('training/lambda_1s_clean.csv')
+lambda_2_values_clean = pd.read_csv('training/lambda_2s_clean.csv')
+lambda_1_values_noisy = pd.read_csv('training/lambda_1s_noisy.csv')
+lambda_2_values_noisy = pd.read_csv('training/lambda_2s_noisy.csv')
 
 data = pd.read_csv('training/KdV_training_data_clean.csv')
 
@@ -86,21 +91,23 @@ savefig('figures/KdV_clean_loss_curve.pdf')
 fig, axs = plt.subplots(1, 2, figsize=(8, 3))
 
 # Primer subplot
-axs[0].semilogy(data['Iter'], data['l1'], label='L1', color='gray', linewidth=2)
+axs[0].plot(data['Iter'], lambda_1_values_clean.values, label='L1', color='gray', linewidth=2)
 axs[0].set_xlabel('Iteration')
-axs[0].set_ylabel(r'$\lambda_{1}$ Error ($\%$)')
+axs[0].set_ylabel(r'$\lambda_{1}$')
+#axs[0].set_ylim([0,100])
  
 # Segundo subplot
-axs[1].semilogy(data['Iter'], data['l2'], label='L2', color='gray', linewidth=2)
+axs[1].plot(data['Iter'], lambda_2_values_clean.values, label='L2', color='gray', linewidth=2)
 axs[1].set_xlabel('Iteration')
-axs[1].set_ylabel(r'$\lambda_{2}$ Error ($\%$)')
- 
+axs[1].set_ylabel(r'$\lambda_{2}$')
+#axs[1].set_ylim([0,100])
+
 
 # Ajustar el espaciado entre los subplots
 plt.tight_layout()
 
 # Guardar la figura en diferentes formatos
-plt.savefig('figures/KdV_clean_error_curves.pdf')
+plt.savefig('figures/KdV_clean_curves.pdf')
 
 
 data = pd.read_csv('training/KdV_training_data_noisy.csv')
@@ -117,21 +124,22 @@ savefig('figures/KdV_noisy_loss_curve.pdf')
 fig, axs = plt.subplots(1, 2, figsize=(8, 3))
 
 # Primer subplot
-axs[0].plot(data['Iter'], data['l1'], label='L1', color='gray', linewidth=2)
+axs[0].plot(data['Iter'], lambda_1_values_noisy.values, label='L1', color='gray', linewidth=2)
 axs[0].set_xlabel('Iteration')
 axs[0].set_ylabel(r'$\lambda_{1}$ Error ($\%$)')
+axs[0].set_ylim([0,100])
 
 # Segundo subplot
-axs[1].plot(data['Iter'], data['l2'], label='L2', color='gray', linewidth=2)
+axs[1].plot(data['Iter'], lambda_2_values_noisy.values, label='L2', color='gray', linewidth=2)
 axs[1].set_xlabel('Iteration')
 axs[1].set_ylabel(r'$\lambda_{2}$ Error ($\%$)')
-
+axs[1].set_ylim([0,100])
 
 # Ajustar el espaciado entre los subplots
 plt.tight_layout()
 
 # Guardar la figura en diferentes formatos
-plt.savefig('figures/KdV_noisy_error_curves.pdf')
+plt.savefig('figures/KdV_noisy_curves.pdf')
     
 q = 50
 skip = 120
@@ -179,10 +187,7 @@ x1_pt.requires_grad = True
 u0_pt = torch.from_numpy(u0) 
 u1_pt = torch.from_numpy(u1)     
 
-lambda_1_values_clean = pd.read_csv('training/lambda_1s_clean.csv')
-lambda_2_values_clean = pd.read_csv('training/lambda_2s_clean.csv')
-lambda_1_values_noisy = pd.read_csv('training/lambda_1s_noisy.csv')
-lambda_2_values_noisy = pd.read_csv('training/lambda_2s_noisy.csv')
+
  
 lambda_1_value = lambda_1_values_clean['l1'].iloc[-1] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][-1]
 lambda_2_value = lambda_2_values_clean['l2'].iloc[-1] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][-1]
@@ -280,4 +285,76 @@ s5 = r'\end{tabular}$'
 s = s1+s2+s3+s4+s5
 ax.text(-0.24,0.42,s)
 
-savefig('./figures/KdV_') 
+savefig('./figures/KdV.pdf') 
+
+
+
+# Cargar y graficar modelos
+for iter_num in range(1000, 100_000, 1000):
+    
+    lambda_1_value=lambda_1_values_clean['l1'][iter_num-1]
+    lambda_2_value=lambda_2_values_clean['l2'][iter_num-1]
+    lambda_1_value_noisy=lambda_1_values_noisy['l1'][iter_num-1]
+    lambda_2_value_noisy=lambda_2_values_noisy['l2'][iter_num-1]
+    
+    fig, ax = newfig(1.0, 1.5)
+    ax.axis('off')
+
+    gs0 = gridspec.GridSpec(1, 2)
+    gs0.update(top=1-0.06, bottom=1-1/3+0.05, left=0.15, right=0.85, wspace=0)
+    ax = plt.subplot(gs0[:, :])
+        
+    h = ax.imshow(Exact, interpolation='nearest', cmap='rainbow',
+                    extent=[t_star.min(),t_star.max(), lb[0], ub[0]],
+                    origin='lower', aspect='auto')
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(h, cax=cax)
+
+    line = np.linspace(x_star.min(), x_star.max(), 2)[:,None]
+    ax.plot(t_star[idx_t]*np.ones((2,1)), line, 'w-', linewidth = 1.0)
+    ax.plot(t_star[idx_t + skip]*np.ones((2,1)), line, 'w-', linewidth = 1.0)    
+    ax.set_xlabel('$t$')
+    ax.set_ylabel('$x$')
+    ax.set_title('$u(t,x)$', fontsize = 10)
+
+    gs1 = gridspec.GridSpec(1, 2)
+    gs1.update(top=1-1/3-0.1, bottom=1-2/3, left=0.15, right=0.85, wspace=0.5)
+
+    ax = plt.subplot(gs1[0, 0])
+    ax.plot(x_star,Exact[:,idx_t][:,None], 'b', linewidth = 2, label = 'Exact')
+    ax.plot(x0, u0, 'rx', linewidth = 2, label = 'Data')
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$u(t,x)$')
+    ax.set_title('$t = %.2f$\n%d trainng data' % (t_star[idx_t], u0.shape[0]), fontsize = 10)
+
+    ax = plt.subplot(gs1[0, 1])
+    ax.plot(x_star,Exact[:,idx_t + skip][:,None], 'b', linewidth = 2, label = 'Exact')
+    ax.plot(x1, u1, 'rx', linewidth = 2, label = 'Data')
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$u(t,x)$')
+    ax.set_title('$t = %.2f$\n%d trainng data' % (t_star[idx_t+skip], u1.shape[0]), fontsize = 10)
+    ax.legend(loc='upper center', bbox_to_anchor=(-0.3, -0.3), ncol=2, frameon=False)
+
+    gs2 = gridspec.GridSpec(1, 2)
+    gs2.update(top=1-2/3-0.05, bottom=0, left=0.15, right=0.85, wspace=0.0)
+
+    ax = plt.subplot(gs2[0, 0])
+    ax.axis('off')
+    s1 = r'$\begin{tabular}{ |c|c| }  \hline Correct PDE & $u_t + u u_x + 0.0025 u_{xxx} = 0$ \\  \hline Identified PDE (clean data) & '
+    s2 = r'$u_t + %.3f u u_x + %.7f u_{xxx} = 0$ \\  \hline ' % (lambda_1_value, lambda_2_value)
+    s3 = r'Identified PDE (1\% noise) & '
+    s4 = r'$u_t + %.3f u u_x + %.7f u_{xxx} = 0$  \\  \hline ' % (lambda_1_value_noisy, lambda_2_value_noisy)
+    s5 = r'\end{tabular}$'
+    s = s1+s2+s3+s4+s5
+    ax.text(-0.24,0.42,s)    
+    
+    image_filename = f'./figures_iters/KdV_{iter_num}.png'
+    savefig(image_filename) 
+    images.append(image_filename)
+    
+with imageio.get_writer('figures/KdV.gif', mode='I', duration=1.5) as writer:
+    for filename in images:
+        image = imageio.imread(filename)
+        writer.append_data(image)    
+    
