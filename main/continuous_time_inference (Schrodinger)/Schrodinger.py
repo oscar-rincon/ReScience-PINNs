@@ -101,7 +101,7 @@ def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
     error = np.linalg.norm(h_star-h_pred.detach().numpy(),2)/np.linalg.norm(h_star,2) 
     results.append([iter, loss.item(), error])    
     if iter % 1000 == 0:
-        torch.save(model.state_dict(), f'model/Schrodinger_{iter}.pt')
+        torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
 
@@ -120,7 +120,7 @@ def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
         results.append([iter, loss.item(), error])
         iter += 1
         if iter % 1000 == 0:
-            torch.save(model.state_dict(), f'model/Schrodinger_{iter}.pt')
+            torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
 
 def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
@@ -198,13 +198,13 @@ if __name__== "__main__":
         os.makedirs('training')
         
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=20_000)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=20_000)
+    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")

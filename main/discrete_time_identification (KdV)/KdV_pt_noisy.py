@@ -79,7 +79,7 @@ def mse(model, x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta, u0_pt, u
     return loss
 
 def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000):
-    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-5)
+    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-3)
     global iter
     for i in range(1,num_iter+1):
         iter += 1 

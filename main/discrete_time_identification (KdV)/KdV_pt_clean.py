@@ -79,7 +79,7 @@ def mse(model, x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta,u0_pt, u1
     return loss
 
 def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000):
-    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-5)
+    optimizer = torch.optim.Adam(list(model.parameters())+[lambda_1,lambda_2], lr=1e-3)
     global iter
     for i in range(1,num_iter+1):
         iter += 1 
@@ -93,7 +93,7 @@ def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta, 
         error_lambda_2 = np.abs(torch.exp(lambda_2).detach().numpy() - 0.0025)/0.0025 * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
         if i % 1000 == 0:
-            #torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
+            torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.detach().numpy().item()} - l2: {torch.exp(lambda_2).detach().numpy().item()}")
  
 
