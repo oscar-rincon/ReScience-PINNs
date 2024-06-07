@@ -239,7 +239,7 @@ for i in range(100, 10_001, 100):
     image_path = os.path.join(image_dir, f'Schrodinger_{i}.png')
     images.append(imageio.imread(image_path))
 
-imageio.mimsave(gif_filename, images, fps=10)    
+imageio.mimsave(gif_filename, images, fps=20)    
 
 
 # with imageio.get_writer('figures/Schrodinger.gif', mode='I', duration=1.5) as writer:
