@@ -1,21 +1,14 @@
 import os 
 import sys
-sys.path.insert(0, '../../Utilities/')
-
 import torch
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
 import time
-import scipy.io as sp
-import scipy.io
-from plotting import newfig, savefig
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.gridspec as gridspec
+import scipy.io  
 from functools import partial
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 import warnings
 
+sys.path.insert(0, '../../Utilities/')
 warnings.filterwarnings("ignore")
 
 def set_seed(seed: int = 42):
@@ -28,9 +21,9 @@ def set_seed(seed: int = 42):
 class KdVNN(nn.Module):
     def __init__(self):
         super(KdVNN, self).__init__()
-        self.linear_in = nn.Linear(1, 50, dtype=torch.float64)
-        self.linear_out = nn.Linear(50, 50, dtype=torch.float64)
-        self.layers = nn.ModuleList([nn.Linear(50, 50, dtype=torch.float64) for _ in range(5)])
+        self.linear_in = nn.Linear(1, 50)
+        self.linear_out = nn.Linear(50, 50)
+        self.layers = nn.ModuleList([nn.Linear(50, 50) for _ in range(5)])
         self.act = nn.Tanh()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -43,7 +36,7 @@ class KdVNN(nn.Module):
 def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
-        m.bias.data.fill_(0.01)    
+        m.bias.data.fill_(0.0)    
 
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor):
     z = torch.ones(dy.shape, device=dy.device).requires_grad_()
@@ -90,14 +83,12 @@ def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2,dt, IRK_alpha, IRK_beta, 
         optimizer.step()
         lambda_1s.append(lambda_1.item())
         lambda_2s.append(torch.exp(lambda_2).item())
-        #error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0)/1.0 *100
-        #error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - 0.0025)/0.0025 * 100
-        #results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
+        error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0)/1.0 *100
+        error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - 0.0025)/0.0025 * 100
+        results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
         if i % 1000 == 0:
-            torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
-            print(f"Adam - Iter: {iter} - Loss: {loss.item()}")
-            #print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
- 
+            torch.save(model.state_dict(), f'models_iters/KdV_noisy_{iter}.pt')
+            print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
 
 def train_lbfgs(model, x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha,IRK_beta,u0_pt,u1_pt, num_iter=50_000):
     optimizer = torch.optim.LBFGS(list(model.parameters())+[lambda_1,lambda_2],
@@ -122,7 +113,7 @@ def closure(model,optimizer,x0_pt,x1_pt, lambda_1, lambda_2,dt, IRK_alpha,IRK_be
     error_lambda_2 = np.abs(torch.exp(lambda_2).detach().numpy() - 0.0025)/0.0025 * 100
     results.append([iter, loss.item(), error_lambda_1.item(),error_lambda_2.item()])
     if iter % 1000 == 0:
-        torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
+        torch.save(model.state_dict(), f'models_iters/KdV_noisy_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.detach().numpy().item()} - l2: {torch.exp(lambda_2).detach().numpy().item()}")
     return loss    
 
@@ -137,7 +128,7 @@ if __name__ == "__main__":
         os.makedirs('training')
 
     # Check for GPU availability
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu') #torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
     print(f'Using device: {device}')
 
     q = 50
@@ -155,7 +146,7 @@ if __name__ == "__main__":
 
     idx_t = 40
 
-    noise = 0.0    
+    noise = 0.01    
 
     idx_x = np.random.choice(Exact.shape[0], N0, replace=False)
     x0 = x_star[idx_x,:]
@@ -176,34 +167,26 @@ if __name__ == "__main__":
     # Load IRK weights
     tmp = np.float32(np.loadtxt('../../Utilities/IRK_weights/Butcher_IRK%d.txt' % (q), ndmin = 2))
     weights =  np.reshape(tmp[0:q**2+q], (q+1, q))    
-    IRK_alpha = torch.from_numpy(weights[0:-1,:]).double().to(device)
-    IRK_beta = torch.from_numpy(weights[-1:,:]).double().to(device)       
+    IRK_alpha = torch.from_numpy(weights[0:-1,:]).float().to(device)
+    IRK_beta = torch.from_numpy(weights[-1:,:]).float().to(device)       
     IRK_times = tmp[q**2+q:]
 
     # Convert data to PyTorch tensors and move to GPU
-    x0_pt = torch.from_numpy(x0).to(device)
+    x0_pt = torch.from_numpy(x0).float().to(device)
     x0_pt.requires_grad = True
-    x1_pt = torch.from_numpy(x1).to(device)
+    x1_pt = torch.from_numpy(x1).float().to(device)
     x1_pt.requires_grad = True
     u0_pt = torch.from_numpy(u0).to(device)
     u1_pt = torch.from_numpy(u1).to(device)
     
     lambda_1 = torch.nn.Parameter(torch.zeros(1, requires_grad=True, device=device))
-    lambda_2 = torch.nn.Parameter(torch.tensor([-6.0], dtype=torch.float64, requires_grad=True, device=device))  
+    lambda_2 = torch.nn.Parameter(torch.tensor([-6.0], dtype=torch.float32, requires_grad=True, device=device))  
     lambda_1s = []
     lambda_2s = []
     results = []         
     
     model = KdVNN().to(device)
     model.apply(init_weights)  
-    
-    x0_pt = x0_pt.to('cuda')
-    x1_pt = x1_pt.to('cuda')
-    u0_pt = u0_pt.to('cuda')
-    u1_pt = u1_pt.to('cuda')
-    lambda_1 = lambda_1.to('cuda')
-    lambda_2 = lambda_2.to('cuda')
-    model = model.to('cuda')
     
     # Entrenamiento con Adam
     start_time_adam = time.time()
@@ -224,27 +207,21 @@ if __name__ == "__main__":
     total_training_time = adam_training_time + lbfgs_training_time
     print(f"Total training time: {total_training_time:.2f} seconds")
 
-    # Obtener el valor del loss L2 final
+    # Obtener el valor del loss final
     final_loss = results[-1][1]
     print(f"Final Loss: {final_loss:.6f}")
 
-    # Obtener el valor del loss L2 final
-    final_l2 = results[-1][2]
-    print(f"Final L2: {final_l2:.6f}")
-
     # Guardar los tiempos en un archivo de texto junto con el loss L2 final
-    with open('training/KdV_training_summary_clean.txt', 'w') as file:
+    with open('training/KdV_training_summary_noisy.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
         file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Final L2: {final_l2:.6f}\n")
              
     results = np.array(results)
     lambda_1s = np.array(lambda_1s)
     lambda_2s = np.array(lambda_2s)
-    np.savetxt("training/KdV_training_data_clean.csv", results, delimiter=",", header="Iter,Loss,l1,l2", comments="")
-    np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="l1", comments="")    
-    np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")    
-    torch.save(model.state_dict(), f'KdV_clean.pt')   
-  
+    np.savetxt("training/KdV_training_data_noisy.csv", results, delimiter=",", header="Iter,Loss,l1,l2", comments="")
+    np.savetxt("training/lambda_1s_noisy.csv", lambda_1s, delimiter=",", header="l1", comments="")    
+    np.savetxt("training/lambda_2s_noisy.csv", lambda_2s, delimiter=",", header="l2", comments="")    
+    torch.save(model.state_dict(), f'KdV_noisy.pt')   

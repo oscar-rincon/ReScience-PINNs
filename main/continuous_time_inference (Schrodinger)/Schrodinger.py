@@ -98,7 +98,7 @@ def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
     iter += 1
     pred = model(X_star)
     h_pred = (pred[:, 0]**2 + pred[:, 1]**2)**0.5
-    error = np.linalg.norm(h_star-h_pred.detach().numpy(),2)/np.linalg.norm(h_star,2) 
+    error = np.linalg.norm(h_star-h_pred.cpu().detach().numpy(),2)/np.linalg.norm(h_star,2) 
     results.append([iter, loss.item(), error])    
     if iter % 1000 == 0:
         torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
@@ -116,7 +116,7 @@ def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
         optimizer.step()
         pred = model(X_star)
         h_pred = (pred[:, 0]**2 + pred[:, 1]**2)**0.5
-        error = np.linalg.norm(h_star-h_pred.detach().numpy(),2)/np.linalg.norm(h_star,2) 
+        error = np.linalg.norm(h_star-h_pred.cpu().detach().numpy(),2)/np.linalg.norm(h_star,2) 
         results.append([iter, loss.item(), error])
         iter += 1
         if iter % 1000 == 0:
@@ -137,6 +137,10 @@ def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
     optimizer.step(closure_fn)
 
 if __name__== "__main__":
+    # Verificar la disponibilidad de la GPU
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f'Using device: {device}')
+
     set_seed(42)
     iter = 0
      
@@ -162,19 +166,19 @@ if __name__== "__main__":
     h_0 = torch.stack((u_0, v_0), axis=1)
 
     c_f = lb + (ub-lb)*lhs(2, N_f)
-    x_f = torch.from_numpy(c_f[:, 0].astype(np.float32))
+    x_f = torch.from_numpy(c_f[:, 0].astype(np.float32)).to(device)
     x_f.requires_grad = True
-    t_f = torch.from_numpy(c_f[:, 1].astype(np.float32))
+    t_f = torch.from_numpy(c_f[:, 1].astype(np.float32)).to(device)
     t_f.requires_grad = True
 
     idx_0 = np.random.choice(x_0.shape[0], N0, replace=False)
-    x_0 = x_0[idx_0]
-    u_0 = u_0[idx_0]
-    v_0 = v_0[idx_0]
-    h_0 = h_0[idx_0]
+    x_0 = x_0[idx_0].to(device)
+    u_0 = u_0[idx_0].to(device)
+    v_0 = v_0[idx_0].to(device)
+    h_0 = h_0[idx_0].to(device)
 
     idx_b = np.random.choice(t.shape[0], N_b, replace=False)
-    t_b = t[idx_b]
+    t_b = t[idx_b].to(device)
     
     X, T = torch.meshgrid(torch.tensor(data['x'].flatten()[:]), torch.tensor(data['tt'].flatten()[:]))
     xcol = X.reshape(-1, 1)
@@ -189,13 +193,22 @@ if __name__== "__main__":
     model = SchrodingerNN()
     model.apply(init_weights)
     
-    results = []
+    x_f=x_f.to(device)
+    t_f=t_f.to(device)
+    x_0=x_0.to(device)
+    u_0=u_0.to(device)
+    v_0=v_0.to(device)
+    h_0=h_0.to(device)
+    t_b=t_b.to(device)
+    X_star=X_star.to(device)
+    model.to(device)
     
     if not os.path.exists('models_iters'):
         os.makedirs('models_iters')
 
     if not os.path.exists('training'):
         os.makedirs('training')
+    results = []
         
     start_time_adam = time.time()
     train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
