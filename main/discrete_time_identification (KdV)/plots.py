@@ -288,9 +288,13 @@ ax.text(-0.24,0.42,s)
 savefig('./figures/KdV.pdf') 
 
 
-
+# Generate images for GIF
+ 
+model_dir = 'models_iters/'
+image_dir = 'figures_iters/'
+gif_filename = 'figures/KdV.gif'
 # Cargar y graficar modelos
-for iter_num in range(1000, 100_000, 1000):
+for iter_num in range(1000, 53_001, 1000):
     
     lambda_1_value=lambda_1_values_clean['l1'][iter_num-1]
     lambda_2_value=lambda_2_values_clean['l2'][iter_num-1]
@@ -351,10 +355,13 @@ for iter_num in range(1000, 100_000, 1000):
     
     image_filename = f'./figures_iters/KdV_{iter_num}.png'
     savefig(image_filename) 
-    images.append(image_filename)
-    
-with imageio.get_writer('figures/KdV.gif', mode='I', duration=1.5) as writer:
-    for filename in images:
-        image = imageio.imread(filename)
-        writer.append_data(image)    
-    
+     
+# Create GIF
+images = []
+for i in range(1000, 53_001, 1000):
+    image_path = os.path.join(image_dir, f'KdV_{i}.png')
+    images.append(imageio.imread(image_path))
+
+imageio.mimsave(gif_filename, images, fps=2) 
+
+     
