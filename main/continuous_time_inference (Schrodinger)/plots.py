@@ -41,20 +41,21 @@ class SchrodingerNN(nn.Module):
 
 data = pd.read_csv('training/Schrodinger_training_data.csv')
 
-plt.figure(figsize=(6.0, 2.2))
+fig, axarr = plt.subplots(1, 2, figsize=(6.0, 2.2))  # Dos subplots en una fila
 
-plt.subplot(1, 2, 1)
-plt.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
-plt.xlabel('Iteration')
-plt.ylabel('Loss')
+# Subplot 1: Loss
+axarr[0].semilogy(data['Iter'], data['Loss'], label='Loss', color='blue', linewidth=2)
+axarr[0].set_xlabel('Iteration')
+axarr[0].set_ylabel('Loss')
 
-plt.subplot(1, 2, 2)
-plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=2)
-plt.xlabel('Iteration')
-plt.ylabel('$L_{2}$')
-plt.tight_layout()  # Add this line to make the layout tight
+# Subplot 2: L2 Error
+axarr[1].semilogy(data['Iter'], data['L2'], label='L2 Error', color='blue', linewidth=2)
+axarr[1].set_xlabel('Iteration')
+axarr[1].set_ylabel('$L_{2}$')
 
-savefig('figures/Schrodinger_training_curves.pdf')
+plt.tight_layout()  # Ajuste de diseño para que los subplots no se superpongan
+
+plt.savefig('figures/Schrodinger_training_curves.pdf')
 
 
 lb = np.array([-5.0, 0.0])
