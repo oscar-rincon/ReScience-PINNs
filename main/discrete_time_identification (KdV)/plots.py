@@ -70,17 +70,16 @@ def net_U1(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     U1 = U + dt*torch.matmul(F, (IRK_beta-IRK_alpha).T)
     return U1 
 
+
+# Load the data
 lambda_1_values_clean = pd.read_csv('training/lambda_1s_clean.csv')
 lambda_2_values_clean = pd.read_csv('training/lambda_2s_clean.csv')
 lambda_1_values_noisy = pd.read_csv('training/lambda_1s_noisy.csv')
 lambda_2_values_noisy = pd.read_csv('training/lambda_2s_noisy.csv')
-
-# Load the training data
 KdV_training_data_clean = pd.read_csv('training/KdV_training_data_clean.csv')
 KdV_training_data_noisy = pd.read_csv('training/KdV_training_data_noisy.csv')
 
 # Create subplots
-#fig, axarr = plt.subplots(1, 1, figsize=(1.0, 0.4))  # Adjust the figsize parameter
 fig, axarr  = newfig(0.8, 0.8)
 
 # Plot clean loss curve
@@ -93,13 +92,8 @@ axarr.set_xlabel('Iteration')
 axarr.set_ylabel('Loss')
 axarr.legend(frameon=False)
 
-# Ajustar el espaciado entre los subplots
 plt.tight_layout()
-
-# Save the figure
 plt.savefig('figures/KdV_combined_loss_curve.pdf')
-
-
 
 # Configuración de la figura
 fig, axs = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))
@@ -116,10 +110,8 @@ axs[1].plot(KdV_training_data_noisy['Iter'], lambda_2_values_noisy.values, label
 axs[1].set_xlabel('Iteration')
 axs[1].set_ylabel(r'$\lambda_{2}$')
 axs[1].legend(frameon=False)
-# Ajustar el espaciado entre los subplots
-plt.tight_layout()
 
-# Guardar la figura en diferentes formatos
+plt.tight_layout()
 plt.savefig('figures/KdV_lambda_curves.pdf')
     
 q = 50
