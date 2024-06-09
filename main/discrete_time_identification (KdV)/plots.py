@@ -16,6 +16,7 @@ from functools import partial
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pandas as pd
 import imageio
+import math
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -264,13 +265,30 @@ savefig('./figures/KdV.pdf')
 model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/KdV.gif'
+
+
+# Definir el límite
+limite = 25_001
+
 # Cargar y graficar modelos
-for iter_num in range(1000, 17_001, 1000):
+for iter_num in range(1000, limite, 1000):
+    # Obtener los índices correctos para lambda_1_values_clean
+    if iter_num > lambda_1_values_clean['Lambda1'].index[-1]:
+        iter_num_clean = math.floor(lambda_1_values_clean['Lambda1'].index[-1] / 1000) * 1000
+    else:
+        iter_num_clean = iter_num 
+
+    # Obtener los índices correctos para lambda_1_values_noisy
+    if iter_num > lambda_1_values_noisy['Lambda1'].index[-1]:
+        iter_num_noisy = math.floor(lambda_1_values_noisy['Lambda1'].index[-1] / 1000) * 1000
+    else:
+        iter_num_noisy = iter_num 
     
-    lambda_1_value=lambda_1_values_clean['Lambda1'][iter_num-1]
-    lambda_2_value=lambda_2_values_clean['Lambda2'][iter_num-1]
-    lambda_1_value_noisy=lambda_1_values_noisy['Lambda1'][iter_num-1]
-    lambda_2_value_noisy=lambda_2_values_noisy['Lambda2'][iter_num-1]
+    # Obtener los valores lambda
+    lambda_1_value = lambda_1_values_clean['Lambda1'][iter_num_clean]
+    lambda_2_value = lambda_2_values_clean['Lambda2'][iter_num_clean]
+    lambda_1_value_noisy = lambda_1_values_noisy['Lambda1'][iter_num_noisy]
+    lambda_2_value_noisy = lambda_2_values_noisy['Lambda2'][iter_num_noisy]
     
     fig, ax = newfig(1.0, 1.5)
     ax.axis('off')
@@ -329,8 +347,8 @@ for iter_num in range(1000, 17_001, 1000):
      
 # Create GIF
 images = []
-for i in range(1000, 17_001, 1000):
+for i in range(1000, limite, 1000):
     image_path = os.path.join(image_dir, f'KdV_{i}.png')
     images.append(imageio.imread(image_path))
 
-imageio.mimsave(gif_filename, images, fps=2) 
+imageio.mimsave(gif_filename, images, fps=10) 
