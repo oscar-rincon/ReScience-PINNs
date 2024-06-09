@@ -51,7 +51,7 @@ axarr[0].set_ylabel('Loss')
 # Subplot 2: L2 Error
 axarr[1].semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=1)
 axarr[1].set_xlabel('Iteration')
-axarr[1].set_ylabel('$L_{2}$')
+axarr[1].set_ylabel(r'$\mathrm{L}_2$')
 
 plt.tight_layout()  # Ajuste de diseño para que los subplots no se superpongan
 
