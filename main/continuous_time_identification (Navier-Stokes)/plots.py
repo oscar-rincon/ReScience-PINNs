@@ -289,6 +289,9 @@ ax.axis('off')
 gs2 = gridspec.GridSpec(1, 2)
 gs2.update(top=1, bottom=1-1/2, left=0.1, right=0.9, wspace=0.50)
 ax = plt.subplot(gs2[:, 0])
+
+vmax=np.max(PP_star)
+vmin=np.min(PP_star)
 h = ax.imshow(PP_star, interpolation='nearest', cmap='rainbow', 
                 extent=[x_star.min(), x_star.max(), y_star.min(), y_star.max()], 
                 origin='lower', aspect='auto')
@@ -432,12 +435,13 @@ for iter_num in range(1000, 37_001, 1000):
 
     ######## Row 2: Pressure #######################
     ########      Predicted p(t,x,y)     ########### 
+
     gs2 = gridspec.GridSpec(1, 2)
     gs2.update(top=1, bottom=1-1/2, left=0.1, right=0.9, wspace=0.50)
     ax = plt.subplot(gs2[:, 0])
     h = ax.imshow(PP_star, interpolation='nearest', cmap='rainbow', 
                     extent=[x_star.min(), x_star.max(), y_star.min(), y_star.max()], 
-                    origin='lower', aspect='auto')
+                    origin='lower', aspect='auto',vmax=vmax,vmin=vmin)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
 
