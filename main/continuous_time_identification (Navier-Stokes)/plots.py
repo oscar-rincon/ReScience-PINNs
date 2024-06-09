@@ -355,15 +355,30 @@ savefig('figures/NS.png')
 savefig('figures/NS.pdf')
 
  
+# Definir el límite
+limite = 42_001
+
 # Cargar y graficar modelos
-for iter_num in range(1000, 37_001, 1000):
+for iter_num in range(1000, limite, 1000):
+    # Obtener los índices correctos
+    if iter_num > lambda_1_values_clean['l1'].index[-1]:
+        iter_num_clean = round(lambda_1_values_clean['l1'].index[-1],-3)
+    else:
+        iter_num_clean = iter_num 
 
-    lambda_1_value=lambda_1_values_clean['l1'][iter_num-1]
-    lambda_2_value=lambda_2_values_clean['l2'][iter_num-1]
-    lambda_1_value_noisy=lambda_1_values_noisy['l1'][iter_num-1]
-    lambda_2_value_noisy=lambda_2_values_noisy['l2'][iter_num-1]
+    if iter_num > lambda_2_values_clean['l2'].index[-1]:
+        iter_num_noisy = lambda_2_values_clean['l2'].index[-1]
+    else:
+        iter_num_noisy = iter_num 
 
-    model_path = f'models_iters/NS_clean_{iter_num}.pt'
+    # Obtener los valores lambda
+    lambda_1_value = lambda_1_values_clean['l1'].iloc[iter_num_clean] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][iter_num_clean]
+    lambda_2_value = lambda_2_values_clean['l2'].iloc[iter_num_noisy] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][iter_num_noisy]
+    lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[iter_num_clean] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][iter_num_clean]
+    lambda_2_value_noisy = lambda_2_values_noisy['l2'].iloc[iter_num_noisy] if isinstance(lambda_2_values_noisy['l2'], pd.Series) else lambda_2_values_noisy['l2'][iter_num_noisy]
+
+    # Cargar el modelo
+    model_path = f'models_iters/NS_clean_{iter_num_clean}.pt'
     model = NSNN()
     model.load_state_dict(torch.load(model_path))
     model.eval()
@@ -504,7 +519,7 @@ images = []
 image_dir = 'figures_iters/'
 gif_filename = 'figures/NS.gif'
 
-for i in range(1000, 37_001, 1000):
+for i in range(1000, limite, 1000):
     image_path = os.path.join(image_dir, f'NS_{i}.png')
     images.append(imageio.imread(image_path))
 
