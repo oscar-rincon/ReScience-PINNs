@@ -41,15 +41,15 @@ class SchrodingerNN(nn.Module):
 
 data = pd.read_csv('training/Schrodinger_training_data.csv')
 
-fig, axarr = plt.subplots(1, 2, figsize=(6.0, 2.2))  # Dos subplots en una fila
+fig, axarr = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))  # Dos subplots en una fila
 
 # Subplot 1: Loss
-axarr[0].semilogy(data['Iter'], data['Loss'], label='Loss', color='blue', linewidth=2)
+axarr[0].semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=1)
 axarr[0].set_xlabel('Iteration')
 axarr[0].set_ylabel('Loss')
 
 # Subplot 2: L2 Error
-axarr[1].semilogy(data['Iter'], data['L2'], label='L2 Error', color='blue', linewidth=2)
+axarr[1].semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=1)
 axarr[1].set_xlabel('Iteration')
 axarr[1].set_ylabel('$L_{2}$')
 
@@ -234,7 +234,7 @@ model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/Schrodinger.gif'
 
-for i in range(1000, 57_001, 1000):
+for i in range(1000, 17_001, 1000):
     model = SchrodingerNN()
     model_path = os.path.join(model_dir, f'Schrodinger_{i}.pt')
     model.load_state_dict(torch.load(model_path))
@@ -357,7 +357,7 @@ for i in range(1000, 57_001, 1000):
 # Create GIF
 images = []
 
-for i in range(1000, 57_001, 1000):
+for i in range(1000, 17_001, 1000):
     image_path = os.path.join(image_dir, f'Schrodinger_{i}.png')
     images.append(imageio.imread(image_path))
 

@@ -10,6 +10,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+# Function to set seed for reproducibility
 def set_seed(seed: int = 42):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -17,6 +18,7 @@ def set_seed(seed: int = 42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+# Define the Schrodinger Neural Network model
 class SchrodingerNN(nn.Module):
     def __init__(self):
         super(SchrodingerNN, self).__init__()
@@ -32,6 +34,7 @@ class SchrodingerNN(nn.Module):
         x = self.linear_out(x)
         return x
 
+# Function to compute derivatives
 def derivative(dy: torch.Tensor, x: torch.Tensor, order: int = 1) -> torch.Tensor:
     for i in range(order):
         dy = torch.autograd.grad(
@@ -39,6 +42,7 @@ def derivative(dy: torch.Tensor, x: torch.Tensor, order: int = 1) -> torch.Tenso
         )[0]
     return dy
 
+# Function to define the PDE
 def f(model, x_f, t_f):
     h = model(torch.stack((x_f, t_f), axis = 1))
     u = h[:, 0]
@@ -51,10 +55,12 @@ def f(model, x_f, t_f):
     f_v = v_t - 0.5*u_xx - (u**2 + v**2)*u 
     return f_u, f_v
 
+# Function to compute mean squared error of PDE residuals
 def mse_f(model, x_f, t_f):
     f_u, f_v = f(model, x_f, t_f)
     return (f_u**2 + f_v**2).mean()
 
+# Function to compute mean squared error of initial condition
 def mse_0(model, x_0, u_0, v_0):
     t_0 = torch.zeros_like(x_0)
     h = model(torch.stack((x_0, t_0), axis = 1))
@@ -62,7 +68,9 @@ def mse_0(model, x_0, u_0, v_0):
     h_v = h[:, 1]
     return ((h_u-u_0)**2+(h_v-v_0)**2).mean()
 
+# Function to compute mean squared error of boundary conditions
 def mse_b(model, t_b):
+    # Left boundary
     x_b_left = torch.zeros_like(t_b)-5
     x_b_left.requires_grad = True
     h_b_left = model(torch.stack((x_b_left, t_b), axis = 1))
@@ -71,6 +79,7 @@ def mse_b(model, t_b):
     h_u_b_left_x = derivative(h_u_b_left, x_b_left, 1)
     h_v_b_left_x = derivative(h_v_b_left, x_b_left, 1)
     
+    # Right boundary
     x_b_right = torch.zeros_like(t_b)+5
     x_b_right.requires_grad = True
     h_b_right = model(torch.stack((x_b_right, t_b), axis = 1))
@@ -79,17 +88,20 @@ def mse_b(model, t_b):
     h_u_b_right_x = derivative(h_u_b_right, x_b_right, 1)
     h_v_b_right_x = derivative(h_v_b_right, x_b_right, 1)
 
+    # Compute MSE for Dirichlet and Neumann boundary conditions
     mse_drichlet = (h_u_b_left-h_u_b_right)**2+(h_v_b_left-h_v_b_right)**2
     mse_newman = (h_u_b_left_x-h_u_b_right_x)**2+(h_v_b_left_x-h_v_b_right_x)**2
     mse_total = (mse_drichlet + mse_newman).mean()
     
     return mse_total
 
+# Function to initialize weights of the neural network
 def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
         m.bias.data.fill_(0.0)
 
+# Closure function for LBFGS optimization
 def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
     optimizer.zero_grad()
     loss = mse_f(model, x_f, t_f) + mse_0(model, x_0, u_0, v_0) + mse_b(model, t)
@@ -105,6 +117,7 @@ def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
 
+# Function for Adam training
 def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
     global iter
@@ -123,6 +136,7 @@ def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
             torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
 
+# Function for L-BFGS training
 def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
     optimizer = torch.optim.LBFGS(model.parameters(),
                                     lr=1,
@@ -137,7 +151,7 @@ def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
     optimizer.step(closure_fn)
 
 if __name__== "__main__":
-    # Verificar la disponibilidad de la GPU
+    # Check GPU availability
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
 
@@ -166,16 +180,16 @@ if __name__== "__main__":
     h_0 = torch.stack((u_0, v_0), axis=1)
 
     c_f = lb + (ub-lb)*lhs(2, N_f)
-    x_f = torch.from_numpy(c_f[:, 0].astype(np.float32)).to(device)
+    x_f = torch.from_numpy(c_f[:, 0].astype(np.float32))
     x_f.requires_grad = True
-    t_f = torch.from_numpy(c_f[:, 1].astype(np.float32)).to(device)
+    t_f = torch.from_numpy(c_f[:, 1].astype(np.float32))
     t_f.requires_grad = True
 
     idx_0 = np.random.choice(x_0.shape[0], N0, replace=False)
-    x_0 = x_0[idx_0].to(device)
-    u_0 = u_0[idx_0].to(device)
-    v_0 = v_0[idx_0].to(device)
-    h_0 = h_0[idx_0].to(device)
+    x_0 = x_0[idx_0]
+    u_0 = u_0[idx_0]
+    v_0 = v_0[idx_0]
+    h_0 = h_0[idx_0]
 
     idx_b = np.random.choice(t.shape[0], N_b, replace=False)
     t_b = t[idx_b].to(device)
@@ -193,6 +207,7 @@ if __name__== "__main__":
     model = SchrodingerNN()
     model.apply(init_weights)
     
+    # Move tensors to device
     x_f=x_f.to(device)
     t_f=t_f.to(device)
     x_0=x_0.to(device)
@@ -210,12 +225,14 @@ if __name__== "__main__":
         os.makedirs('training')
     results = []
         
+    # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=10_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
 
+    # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
     end_time_lbfgs = time.time()
@@ -225,15 +242,15 @@ if __name__== "__main__":
     total_training_time = adam_training_time + lbfgs_training_time
     print(f"Total training time: {total_training_time:.2f} seconds")
 
-    # Obtener el valor del loss L2 final
+    # Obtain the final loss L2
     final_loss = results[-1][1]
     print(f"Final Loss: {final_loss:.6f}")
 
-    # Obtener el valor del loss L2 final
+    # Obtain the final L2 error
     final_l2 = results[-1][2]
     print(f"Final L2: {final_l2:.6f}")
 
-    # Guardar los tiempos en un archivo de texto junto con el loss L2 final
+    # Save training summary to a text file
     with open('training/Schrodinger_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")

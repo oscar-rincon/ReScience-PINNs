@@ -20,7 +20,6 @@ if not os.path.exists('figures'):
 if not os.path.exists('figures_iters'):
     os.makedirs('figures_iters')    
 
-
 class ACNN(nn.Module):
     def __init__(self):
         super(ACNN, self).__init__()
@@ -38,21 +37,20 @@ class ACNN(nn.Module):
 
 data = pd.read_csv('training/AC_training_data.csv')
 
-plt.figure(figsize=(7.8, 2.5))
+fig, axarr = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))  # Dos subplots en una fila
 
-plt.subplot(1, 2, 1)
-plt.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
-plt.xlabel('Iteration')
-plt.ylabel('Loss')
+# Subplot 1: Loss
+axarr[0].semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=1)
+axarr[0].set_xlabel('Iteration')
+axarr[0].set_ylabel('Loss')
 
-plt.subplot(1, 2, 2)
-plt.semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=2)
-plt.xlabel('Iteration')
-plt.ylabel('$L_{2}$')
+# Subplot 2: L2 Error
+axarr[1].semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=1)
+axarr[1].set_xlabel('Iteration')
+axarr[1].set_ylabel('$L_{2}$')
+plt.tight_layout()  # Adjusting layout so subplots don't overlap
 
-savefig('figures/AC_training_curves.pdf')
-
-
+plt.savefig('figures/AC_training_curves.pdf')
 
 q = 100
 lb = np.array([-1.0], dtype=np.float64)
@@ -138,7 +136,7 @@ savefig(image_filename)
 
 images = []
 # Cargar y graficar modelos
-for iter_num in range(1000, 121_000, 1000):
+for iter_num in range(1000, 20_000, 1000):
     model_path = f'models_iters/AC_{iter_num}.pt'
     model = ACNN()
     model.load_state_dict(torch.load(model_path))
@@ -191,16 +189,12 @@ for iter_num in range(1000, 121_000, 1000):
     
     image_filename = f'figures_iters/AC_{iter_num}.png'
     savefig(image_filename)
-    images.append(image_filename)
-    
     plt.close(fig)
 
-# Crear el GIF
-with imageio.get_writer('figures/AC.gif', mode='I', duration=0.5) as writer:
-    for filename in images:
-        image = imageio.imread(filename)
-        writer.append_data(image)
+images = []
 
-# Eliminar las imágenes temporales si no se necesitan
-#for filename in images:
-#    os.remove(filename)
+for i in range(1000, 20_000, 1000):
+    image_path = f'figures_iters/AC_{i}.png'
+    images.append(imageio.imread(image_path))
+
+imageio.mimsave('figures/AC.gif', images, fps=5)

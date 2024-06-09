@@ -49,8 +49,8 @@ pgf_with_latex = {                      # setup matplotlib to use latex for outp
 mpl.rcParams.update(pgf_with_latex)
 
 # I make my own newfig and savefig functions
-def newfig(width, nplots = 1):
-    fig = plt.figure(figsize=figsize(width, nplots))
+def newfig(width,height, nplots = 1):
+    fig = plt.figure(figsize=figsize(width, height, nplots))
     ax = fig.add_subplot(111)
     return fig, ax
 

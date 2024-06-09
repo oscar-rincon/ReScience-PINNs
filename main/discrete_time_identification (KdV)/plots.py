@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time
 import scipy.io as sp
 import scipy.io
-from plotting import newfig, savefig
+from plotting import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.gridspec as gridspec
 from functools import partial
@@ -75,71 +75,52 @@ lambda_2_values_clean = pd.read_csv('training/lambda_2s_clean.csv')
 lambda_1_values_noisy = pd.read_csv('training/lambda_1s_noisy.csv')
 lambda_2_values_noisy = pd.read_csv('training/lambda_2s_noisy.csv')
 
-data = pd.read_csv('training/KdV_training_data_clean.csv')
+# Load the training data
+KdV_training_data_clean = pd.read_csv('training/KdV_training_data_clean.csv')
+KdV_training_data_noisy = pd.read_csv('training/KdV_training_data_noisy.csv')
 
+# Create subplots
+#fig, axarr = plt.subplots(1, 1, figsize=(1.0, 0.4))  # Adjust the figsize parameter
+fig, axarr  = newfig(0.8, 0.8)
 
-fig, ax  = newfig(1.0)
+# Plot clean loss curve
+axarr.semilogy(KdV_training_data_clean['Iter'], KdV_training_data_clean['Loss'], label='Clean', color='blue', linewidth=1)
 
-ax.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
-ax.set_xlabel('Iteration')
-ax.set_ylabel('Loss')
+# Plot noisy loss curve
+axarr.semilogy(KdV_training_data_noisy['Iter'], KdV_training_data_noisy['Loss'], label='Noisy', color='red', linewidth=1)
 
-savefig('figures/KdV_clean_loss_curve.pdf')
+axarr.set_xlabel('Iteration')
+axarr.set_ylabel('Loss')
+axarr.legend(frameon=False)
+
+# Ajustar el espaciado entre los subplots
+plt.tight_layout()
+
+# Save the figure
+plt.savefig('figures/KdV_combined_loss_curve.pdf')
+
 
 
 # Configuración de la figura
-fig, axs = plt.subplots(1, 2, figsize=(8, 3))
+fig, axs = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))
 
 # Primer subplot
-axs[0].plot(data['Iter'], lambda_1_values_clean.values, label='L1', color='gray', linewidth=2)
+axs[0].plot(KdV_training_data_clean['Iter'], lambda_1_values_clean.values, label='Clean', color='blue', linewidth=1)
+axs[0].plot(KdV_training_data_noisy['Iter'], lambda_1_values_noisy.values, label='Noisy', color='red', linewidth=1)
 axs[0].set_xlabel('Iteration')
 axs[0].set_ylabel(r'$\lambda_{1}$')
-#axs[0].set_ylim([0,100])
- 
+
 # Segundo subplot
-axs[1].plot(data['Iter'], lambda_2_values_clean.values, label='L2', color='gray', linewidth=2)
+axs[1].plot(KdV_training_data_clean['Iter'], lambda_2_values_clean.values, label=f'Clean', color='blue', linewidth=1)
+axs[1].plot(KdV_training_data_noisy['Iter'], lambda_2_values_noisy.values, label=f'Noisy', color='red', linewidth=1)
 axs[1].set_xlabel('Iteration')
 axs[1].set_ylabel(r'$\lambda_{2}$')
-#axs[1].set_ylim([0,100])
-
-
+axs[1].legend(frameon=False)
 # Ajustar el espaciado entre los subplots
 plt.tight_layout()
 
 # Guardar la figura en diferentes formatos
-plt.savefig('figures/KdV_clean_curves.pdf')
-
-
-data = pd.read_csv('training/KdV_training_data_noisy.csv')
-
-fig, ax  = newfig(1.0)
-
-ax.semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=2)
-ax.set_xlabel('Iteration')
-ax.set_ylabel('Loss')
-
-savefig('figures/KdV_noisy_loss_curve.pdf')
-
-# Configuración de la figura
-fig, axs = plt.subplots(1, 2, figsize=(8, 3))
-
-# Primer subplot
-axs[0].plot(data['Iter'], lambda_1_values_noisy.values, label='L1', color='gray', linewidth=2)
-axs[0].set_xlabel('Iteration')
-axs[0].set_ylabel(r'$\lambda_{1}$ Error ($\%$)')
-axs[0].set_ylim([0,100])
-
-# Segundo subplot
-axs[1].plot(data['Iter'], lambda_2_values_noisy.values, label='L2', color='gray', linewidth=2)
-axs[1].set_xlabel('Iteration')
-axs[1].set_ylabel(r'$\lambda_{2}$ Error ($\%$)')
-axs[1].set_ylim([0,100])
-
-# Ajustar el espaciado entre los subplots
-plt.tight_layout()
-
-# Guardar la figura en diferentes formatos
-plt.savefig('figures/KdV_noisy_curves.pdf')
+plt.savefig('figures/KdV_lambda_curves.pdf')
     
 q = 50
 skip = 120
@@ -186,13 +167,11 @@ x1_pt = torch.from_numpy(x1)
 x1_pt.requires_grad = True
 u0_pt = torch.from_numpy(u0) 
 u1_pt = torch.from_numpy(u1)     
-
-
  
-lambda_1_value = lambda_1_values_clean['l1'].iloc[-1] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][-1]
-lambda_2_value = lambda_2_values_clean['l2'].iloc[-1] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][-1]
-lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[-1] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][-1]
-lambda_2_value_noisy = lambda_2_values_noisy['l2'].iloc[-1] if isinstance(lambda_2_values_noisy['l2'], pd.Series) else lambda_2_values_noisy['l2'][-1]
+lambda_1_value = lambda_1_values_clean['Lambda1'].iloc[-1] if isinstance(lambda_1_values_clean['Lambda1'], pd.Series) else lambda_1_values_clean['Lambda1'][-1]
+lambda_2_value = lambda_2_values_clean['Lambda2'].iloc[-1] if isinstance(lambda_2_values_clean['Lambda2'], pd.Series) else lambda_2_values_clean['Lambda2'][-1]
+lambda_1_value_noisy = lambda_1_values_noisy['Lambda1'].iloc[-1] if isinstance(lambda_1_values_noisy['Lambda1'], pd.Series) else lambda_1_values_noisy['Lambda1'][-1]
+lambda_2_value_noisy = lambda_2_values_noisy['Lambda2'].iloc[-1] if isinstance(lambda_2_values_noisy['Lambda2'], pd.Series) else lambda_2_values_noisy['Lambda2'][-1]
 
 images = []
 
@@ -294,12 +273,12 @@ model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/KdV.gif'
 # Cargar y graficar modelos
-for iter_num in range(1000, 53_001, 1000):
+for iter_num in range(1000, 17_001, 1000):
     
-    lambda_1_value=lambda_1_values_clean['l1'][iter_num-1]
-    lambda_2_value=lambda_2_values_clean['l2'][iter_num-1]
-    lambda_1_value_noisy=lambda_1_values_noisy['l1'][iter_num-1]
-    lambda_2_value_noisy=lambda_2_values_noisy['l2'][iter_num-1]
+    lambda_1_value=lambda_1_values_clean['Lambda1'][iter_num-1]
+    lambda_2_value=lambda_2_values_clean['Lambda2'][iter_num-1]
+    lambda_1_value_noisy=lambda_1_values_noisy['Lambda1'][iter_num-1]
+    lambda_2_value_noisy=lambda_2_values_noisy['Lambda2'][iter_num-1]
     
     fig, ax = newfig(1.0, 1.5)
     ax.axis('off')
@@ -358,10 +337,8 @@ for iter_num in range(1000, 53_001, 1000):
      
 # Create GIF
 images = []
-for i in range(1000, 53_001, 1000):
+for i in range(1000, 17_001, 1000):
     image_path = os.path.join(image_dir, f'KdV_{i}.png')
     images.append(imageio.imread(image_path))
 
 imageio.mimsave(gif_filename, images, fps=2) 
-
-     
