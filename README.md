@@ -1,12 +1,19 @@
-# ReScience-PINNs
+# [Re] Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations 
 
 This project is a replication of ''Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations'' by M. Raissi, P. Perdikaris, and G.E. Karniadakis from 2019.
 
+Full reference to the original article :
+
+> Raissi, M., P. Perdikaris, and G. E. Karniadakis. “Physics-Informed Neural Networks: A Deep Learning Framework for Solving Forward and Inverse Problems Involving Nonlinear Partial Differential Equations.” Journal of Computational Physics 378 (February 1, 2019): 686–707. https://doi.org/10.1016/j.jcp.2018.10.045.
+
+
 The aim of this project was to:
 
-- Reproduce the figures from the main manuscript of Raissi et al. (2019) using the Python library PyTorch. 
-- Save the models obtained from the training.
-- Record the training information such as computing times and the accuracies achieved.
+>- Reproduce the figures from the main manuscript of Raissi et al. (2019), originally obtained with Tensorflow 1x, using the Python library PyTorch. 
+> - Save the models obtained from the training.
+> - Record the training information such as computing times and the accuracies achieved.
+
+The replication of the original article was successful and submitted to Rescience C.
 
 ## Repository Organisation
 
@@ -48,4 +55,7 @@ conda list -n ReScience-PINNs-env
  ```
 
  
+## Hardware configuration
+
+The models were trained with a NVIDIA GeForce RTX 4060 GPU card. The summary of the training information such as the computing times is included in the the folder of each simulation.
 

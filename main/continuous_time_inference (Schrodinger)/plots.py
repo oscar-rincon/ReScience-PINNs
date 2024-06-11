@@ -234,7 +234,10 @@ model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/Schrodinger.gif'
 
-for i in range(1000, 17_001, 1000):
+limit = 7401
+step = 100
+
+for i in range(step, limit, step):
     model = SchrodingerNN()
     model_path = os.path.join(model_dir, f'Schrodinger_{i}.pt')
     model.load_state_dict(torch.load(model_path))
@@ -357,10 +360,10 @@ for i in range(1000, 17_001, 1000):
 # Create GIF
 images = []
 
-for i in range(1000, 17_001, 1000):
+for i in range(step, limit, step):
     image_path = os.path.join(image_dir, f'Schrodinger_{i}.png')
     images.append(imageio.imread(image_path))
 
-imageio.mimsave(gif_filename, images, fps=10)    
+imageio.mimsave(gif_filename, images, fps=3)    
  
        

@@ -4,6 +4,6 @@
 
 ## Summary
 
-- Total training time: $1.28809 \times 10^3$ seconds
-- Total number of iterations: $1.7797 \times 10^4$
-- $\mathbb{L}_2$: $1.660 \times 10^{-3}$
+- Total training time: $4.930 \times 10^2$ seconds
+- Total number of iterations: $7.468 \times 10^3$
+- $\mathbb{L}_2$: $1.781 \times 10^{-3}$            

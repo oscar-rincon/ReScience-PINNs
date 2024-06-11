@@ -93,7 +93,7 @@ def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta,
         error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0) / 1.0 * 100
         error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - 0.0025) / 0.0025 * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
-        if i % 1000 == 0:
+        if i % 100 == 0:
             torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
 
@@ -102,7 +102,7 @@ def train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta
     optimizer = torch.optim.LBFGS(list(model.parameters()) + [lambda_1, lambda_2],
                                   max_iter=num_iter,
                                   max_eval=num_iter,
-                                  history_size=50,
+                                  history_size=100,
                                   tolerance_grad=1e-5,
                                   line_search_fn='strong_wolfe',
                                   tolerance_change=1.0 * np.finfo(float).eps)
@@ -121,7 +121,7 @@ def closure(model, optimizer, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, I
     error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0) / 1.0 * 100
     error_lambda_2 = np.abs(torch.exp(lambda_2).detach().numpy() - 0.0025) / 0.0025 * 100
     results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
-    if iter % 1000 == 0:
+    if iter % 100 == 0:
         torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.detach().numpy().item()} - l2: {torch.exp(lambda_2).detach().numpy().item()}")
     return loss    
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         os.makedirs('training')
 
     # Check for GPU availability
-    device = torch.device('cpu') #torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
+    device = torch.device('cpu') # torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
     print(f'Using device: {device}')
 
     # Define parameters
@@ -160,13 +160,11 @@ if __name__ == "__main__":
     idx_x = np.random.choice(Exact.shape[0], N0, replace=False)
     x0 = x_star[idx_x,:]
     u0 = Exact[idx_x,idx_t][:,None] 
-    u0 = u0 + noise * np.std(u0) * np.random.randn(u0.shape[0], u0.shape[1])
-        
+    u0 = u0 + noise * np.std(u0) * np.random.randn(u0.shape[0], u0.shape[1])        
     idx_x = np.random.choice(Exact.shape[0], N1, replace=False)
     x1 = x_star[idx_x,:]
     u1 = Exact[idx_x,idx_t + skip][:,None]
     u1 = u1 + noise * np.std(u1) * np.random.randn(u1.shape[0], u1.shape[1])
-
     dt = torch.tensor((t_star[idx_t+skip] - t_star[idx_t]).item()).to(device)
         
     # Domain bounds
@@ -200,14 +198,14 @@ if __name__ == "__main__":
     
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=10_000)
+    train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")    
     
     # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000)
+    train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=100_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -231,6 +229,7 @@ if __name__ == "__main__":
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Total iterations: {iter}\n") 
         file.write(f"Final Loss: {final_loss:.6f}\n")
         file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%\n")
         file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%\n")

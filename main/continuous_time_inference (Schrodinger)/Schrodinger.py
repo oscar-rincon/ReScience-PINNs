@@ -112,14 +112,14 @@ def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
     h_pred = (pred[:, 0]**2 + pred[:, 1]**2)**0.5
     error = np.linalg.norm(h_star-h_pred.cpu().detach().numpy(),2)/np.linalg.norm(h_star,2) 
     results.append([iter, loss.item(), error])    
-    if iter % 1000 == 0:
+    if iter % 100 == 0:
         torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
 
 # Function for Adam training
 def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     global iter
      
     for i in range(1, num_iter + 1):
@@ -132,7 +132,7 @@ def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
         error = np.linalg.norm(h_star-h_pred.cpu().detach().numpy(),2)/np.linalg.norm(h_star,2) 
         results.append([iter, loss.item(), error])
         iter += 1
-        if iter % 1000 == 0:
+        if iter % 100 == 0:
             torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
 
@@ -143,7 +143,7 @@ def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
                                     max_iter=num_iter,
                                     max_eval=num_iter,
                                     tolerance_grad=1e-5,
-                                    history_size=50,
+                                    history_size=100,
                                     tolerance_change=1.0 * np.finfo(float).eps,
                                     line_search_fn="strong_wolfe")
  
@@ -227,14 +227,14 @@ if __name__== "__main__":
         
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=10_000)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
+    train_lbfgs(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=100_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -255,6 +255,7 @@ if __name__== "__main__":
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Total iterations: {iter}\n")   
         file.write(f"Final Loss: {final_loss:.6f}\n")
         file.write(f"Final L2: {final_l2:.6f}\n")
         

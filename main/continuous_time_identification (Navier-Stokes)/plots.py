@@ -12,6 +12,7 @@ import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import imageio
 import pandas as pd
+import math
 import sys
 sys.path.insert(0, '../../Utilities/') 
 from plotting import *  # Assuming this file contains custom plotting functions
@@ -356,25 +357,27 @@ savefig('figures/NS.pdf')
 
  
 # Definir el límite
-limite = 42_001
+limite = 81_001
+step = 1000
 
 # Cargar y graficar modelos
-for iter_num in range(1000, limite, 1000):
-    # Obtener los índices correctos
+for iter_num in range(step, limite, step):
+    # Obtener los índices correctos para lambda_1_values_clean
     if iter_num > lambda_1_values_clean['l1'].index[-1]:
-        iter_num_clean = round(lambda_1_values_clean['l1'].index[-1],-3)
+        iter_num_clean = math.floor(lambda_1_values_clean['l1'].index[-1] / 1000) * 1000
     else:
         iter_num_clean = iter_num 
 
-    if iter_num > lambda_2_values_clean['l2'].index[-1]:
-        iter_num_noisy = lambda_2_values_clean['l2'].index[-1]
+    # Obtener los índices correctos para lambda_1_values_noisy
+    if iter_num > lambda_1_values_noisy['l1'].index[-1]:
+        iter_num_noisy = math.floor(lambda_1_values_noisy['l1'].index[-1] / 1000) * 1000
     else:
         iter_num_noisy = iter_num 
 
     # Obtener los valores lambda
     lambda_1_value = lambda_1_values_clean['l1'].iloc[iter_num_clean] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][iter_num_clean]
-    lambda_2_value = lambda_2_values_clean['l2'].iloc[iter_num_noisy] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][iter_num_noisy]
-    lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[iter_num_clean] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][iter_num_clean]
+    lambda_2_value = lambda_2_values_clean['l2'].iloc[iter_num_clean] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][iter_num_clean]
+    lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[iter_num_noisy] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][iter_num_noisy]
     lambda_2_value_noisy = lambda_2_values_noisy['l2'].iloc[iter_num_noisy] if isinstance(lambda_2_values_noisy['l2'], pd.Series) else lambda_2_values_noisy['l2'][iter_num_noisy]
 
     # Cargar el modelo
@@ -519,7 +522,7 @@ images = []
 image_dir = 'figures_iters/'
 gif_filename = 'figures/NS.gif'
 
-for i in range(1000, limite, 1000):
+for i in range(step, limite, step):
     image_path = os.path.join(image_dir, f'NS_{i}.png')
     images.append(imageio.imread(image_path))
 

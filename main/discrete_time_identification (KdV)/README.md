@@ -6,14 +6,14 @@
 
 ### Clean data
 
-- Total training time: $3.9665 \times 10^2$ seconds
-- Total number of iterations: $2.5348 \times 10^4$
-- Error in estimating $\lambda_{1}$: 0.004%
-- Error in estimating $\lambda_{2}$: 0.003%
+- Total training time: $1.8996 \times 10^2$ seconds
+- Total number of iterations: $1.0541 \times 10^3$
+- Error in estimating $\lambda_{1}$: 0.002%
+- Error in estimating $\lambda_{2}$: 0.013%
 
 ### Noisy data
 
-- Total training time: $1.5958 \times 10^2$ seconds
-- Total number of iterations: $1.7689 \times 10^4$
-- Error in estimating $\lambda_{1}$: 0.180%
-- Error in estimating $\lambda_{2}$: 0.017%
+- Total training time: $1.3847 \times 10^2$ seconds
+- Total number of iterations: $8.239 \times 10^3$
+- Error in estimating $\lambda_{1}$: 0.194%
+- Error in estimating $\lambda_{2}$: 0.180%

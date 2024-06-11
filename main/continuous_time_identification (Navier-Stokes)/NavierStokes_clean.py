@@ -24,6 +24,7 @@ class NSNN(nn.Module):
         self.act = nn.Tanh()  # Activation function
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        
         x = self.linear_in(x)
         for layer in self.layers:
             x = self.act(layer(x))
@@ -34,7 +35,7 @@ class NSNN(nn.Module):
 def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
-        m.bias.data.fill_(0.0)
+        m.bias.data.fill_(0.01)
 
 # Function to compute derivatives
 def derivative(dy: torch.Tensor, x: torch.Tensor, order: int = 1) -> torch.Tensor:
@@ -81,7 +82,7 @@ def mse(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt):
 
 # Function to train using Adam optimizer
 def train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000):
-    optimizer = torch.optim.Adam(list(model.parameters()) + [lambda_1, lambda_2], lr=1e-5)
+    optimizer = torch.optim.Adam(list(model.parameters()) + [lambda_1, lambda_2], lr=1e-3)
     global iter
      
     for i in range(1, num_iter + 1):
@@ -106,7 +107,7 @@ def train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_p
                                   max_iter=num_iter,
                                   max_eval=num_iter,
                                   tolerance_grad=1e-5,
-                                  history_size=50,
+                                  history_size=100,
                                   tolerance_change=1.0 * np.finfo(float).eps,
                                   line_search_fn="strong_wolfe")
  
@@ -120,10 +121,10 @@ def closure(model, optimizer, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_
     loss.backward(retain_graph=True)
     global iter
     iter += 1
-    lambda_1s.append(lambda_1.item())
-    lambda_2s.append(lambda_2.item())
-    error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0) * 100
-    error_lambda_2 = np.abs(lambda_2.cpu().detach().numpy() - 0.01) / 0.01 * 100
+    lambda_1s.append(lambda_1.cpu().detach().numpy().item())
+    lambda_2s.append(lambda_2.cpu().detach().numpy().item())
+    error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy().item() - 1.0) * 100
+    error_lambda_2 = np.abs(lambda_2.cpu().detach().numpy().item() - 0.01) / 0.01 * 100
     results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
     if iter % 1000 == 0:
         torch.save(model.state_dict(), f'models_iters/NS_clean_{iter}.pt')
@@ -212,14 +213,14 @@ if __name__== "__main__":
     
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=10_000)
+    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
     
     # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=100_000)
+    train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -236,26 +237,9 @@ if __name__== "__main__":
     final_l2 = results[-1][2]
     print(f"Final L2: {final_l2:.6f}")
 
-    # Save times in a text file along with the final L2 loss
-    with open('training/NS_training_summary_clean.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Final L2: {final_l2:.6f}\n")
-             
-    results = np.array(results)
-    lambda_1s = np.array(lambda_1s)
-    lambda_2s = np.array(lambda_2s)
-    np.savetxt("training/NS_training_data_clean.csv", results, delimiter=",", header="Iter,Loss,l1,l2", comments="")
-    np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="l1", comments="")    
-    np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")    
-    torch.save(model.state_dict(), f'NS_clean.pt')
-
-
-    model_path = f'NS_clean.pt'
-    model = NSNN().to(device)
-    model.load_state_dict(torch.load(model_path))
+    # model_path = f'NS_clean.pt'
+    # model = NSNN().to(device)
+    # model.load_state_dict(torch.load(model_path))
     
     # Test Data
     snap = np.array([100])
@@ -291,3 +275,27 @@ if __name__== "__main__":
     print('Error p: %e' % (error_p))     
     print('Error l1: %.5f%%' % (error_lambda_1))                             
     print('Error l2: %.5f%%' % (error_lambda_2))
+
+
+
+    # Save times in a text file along with the final L2 loss
+    with open('training/NS_training_summary_clean.txt', 'w') as file:
+        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
+        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Total iterations: {iter}\n") 
+        file.write(f"Final Loss: {final_loss:.6f}\n")
+        file.write(f"Final L2: {final_l2:.6f}\n")
+        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%\n")
+        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%\n")        
+             
+    results = np.array(results)
+    lambda_1s = np.array(lambda_1s)
+    lambda_2s = np.array(lambda_2s)
+    np.savetxt("training/NS_training_data_clean.csv", results, delimiter=",", header="Iter,Loss,l1,l2", comments="")
+    np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="l1", comments="")    
+    np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")    
+    torch.save(model.state_dict(), f'NS_clean.pt')
+
+
+

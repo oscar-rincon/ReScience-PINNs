@@ -67,7 +67,7 @@ def closure(model, optimizer, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1,
     pred = U1_pred[:, -1].detach().cpu().numpy()
     error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)
     results.append([iter, loss.item(), error])
-    if iter % 1000 == 0:
+    if iter % 100 == 0:
         torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
@@ -85,7 +85,7 @@ def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results
         pred = U1_pred[:, -1].detach().cpu().numpy()
         error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)        
         results.append([iter, loss.item(), error])
-        if i % 1000 == 0:
+        if i % 100 == 0:
             torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
             print(f"Adam - Iter: {i} - Loss: {loss.item()} - L2: {error}")
           
@@ -93,7 +93,7 @@ def train_lbfgs(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, result
     optimizer = torch.optim.LBFGS(model.parameters(),
                                   max_iter=num_iter,
                                   max_eval=num_iter,
-                                  history_size=50,
+                                  history_size=100,
                                   tolerance_grad=1e-5,
                                   line_search_fn='strong_wolfe',
                                   tolerance_change=1.0 * np.finfo(float).eps)
@@ -102,7 +102,7 @@ def train_lbfgs(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, result
 
 if __name__ == "__main__":
     set_seed(42)
-    device = torch.device('cpu') # torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu') #torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
     
     q = 100
@@ -151,14 +151,14 @@ if __name__ == "__main__":
        
     # Training with Adam
     start_time_adam = time.time()
-    train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=10_000)
+    train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
     
     # Training with LBFGS
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=50_000)
+    train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=100_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -180,6 +180,7 @@ if __name__ == "__main__":
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Total iterations: {iter}\n") 
         file.write(f"Final Loss: {final_loss:.6f}\n")
         file.write(f"Final L2: {final_l2:.6f}\n")
              

@@ -268,10 +268,10 @@ gif_filename = 'figures/KdV.gif'
 
 
 # Definir el límite
-limite = 25_001
-
+limite = 10_501
+step = 100
 # Cargar y graficar modelos
-for iter_num in range(1000, limite, 1000):
+for iter_num in range(step, limite, step):
     # Obtener los índices correctos para lambda_1_values_clean
     if iter_num > lambda_1_values_clean['Lambda1'].index[-1]:
         iter_num_clean = math.floor(lambda_1_values_clean['Lambda1'].index[-1] / 1000) * 1000
@@ -347,8 +347,8 @@ for iter_num in range(1000, limite, 1000):
      
 # Create GIF
 images = []
-for i in range(1000, limite, 1000):
+for i in range(step, limite, step):
     image_path = os.path.join(image_dir, f'KdV_{i}.png')
     images.append(imageio.imread(image_path))
 
-imageio.mimsave(gif_filename, images, fps=10) 
+imageio.mimsave(gif_filename, images, fps=5) 

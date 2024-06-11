@@ -135,8 +135,10 @@ image_filename = f'figures/AC.pdf'
 savefig(image_filename)
 
 images = []
+limit = 9_801
+step = 100
 # Cargar y graficar modelos
-for iter_num in range(1000, 20_000, 1000):
+for iter_num in range(step, limit, step):
     model_path = f'models_iters/AC_{iter_num}.pt'
     model = ACNN()
     model.load_state_dict(torch.load(model_path))
@@ -193,7 +195,7 @@ for iter_num in range(1000, 20_000, 1000):
 
 images = []
 
-for i in range(1000, 20_000, 1000):
+for i in range(step, limit, step):
     image_path = f'figures_iters/AC_{i}.png'
     images.append(imageio.imread(image_path))
 
