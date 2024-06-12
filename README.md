@@ -13,7 +13,7 @@ The aim of this project was to:
 > - Save the models obtained from the training.
 > - Record the training information such as computing times and the accuracies achieved.
 
-The replication of the original article was successful and submitted to Rescience C.
+The replication of the original article will be submitted to Rescience C.
 
 ## Repository Organisation
 
@@ -36,16 +36,10 @@ conda create --name ReScience-PINNs-env
 conda activate ReScience-PINNs-env
 ```
 
-Next, clone this repository by using the command:
-
- ```
-git clone https://github.com/oscar-rincon/ReScience-PINNs.git
- ```
-
 Go to the `ReScience-PINNs/` folder and run the following command to install the necessary dependencies:
 
  ```
-conda env update --name ReScience-PINNs-env --file ReScience-PINNs.yaml
+conda env create --name ReScience-PINNs-env --file ReScience-PINNs.yaml
  ```
 
 To verify the packages installed in your `ReScience-PINNs-env` conda environment, you can use the following command:

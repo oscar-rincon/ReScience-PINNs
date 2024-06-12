@@ -97,7 +97,7 @@ def train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
         iter += 1
         if iter % 1000 == 0:
-            torch.save(model.state_dict(), f'models_iters/NS_clean_{iter}.pt')
+            #torch.save(model.state_dict(), f'models_iters/NS_clean_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {lambda_2.cpu().detach().numpy().item()}")
 
 # Function to train using L-BFGS optimizer
@@ -107,7 +107,7 @@ def train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_p
                                   max_iter=num_iter,
                                   max_eval=num_iter,
                                   tolerance_grad=1e-5,
-                                  history_size=100,
+                                  history_size=150,
                                   tolerance_change=1.0 * np.finfo(float).eps,
                                   line_search_fn="strong_wolfe")
  
@@ -127,7 +127,7 @@ def closure(model, optimizer, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_
     error_lambda_2 = np.abs(lambda_2.cpu().detach().numpy().item() - 0.01) / 0.01 * 100
     results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
     if iter % 1000 == 0:
-        torch.save(model.state_dict(), f'models_iters/NS_clean_{iter}.pt')
+        #torch.save(model.state_dict(), f'models_iters/NS_clean_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {lambda_2.cpu().detach().numpy().item()}")
     return loss
 
@@ -213,7 +213,7 @@ if __name__== "__main__":
     
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000)
+    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
