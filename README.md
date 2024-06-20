@@ -1,5 +1,8 @@
 # [Re] Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations 
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/oscar-rincon/ReScience-PINNs/HEAD)
+
+
 This project is a replication of ''Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations'' by M. Raissi, P. Perdikaris, and G.E. Karniadakis from 2019.
 
 Full reference to the original article :
@@ -32,15 +35,9 @@ Each example contains the main and plotting codes, figures (`figures/`), model (
 We recommend setting up a new Python environment with conda. You can do this by running the following commands:
 
 ```
-conda create --name ReScience-PINNs-env
+conda env create -f environment.yml
 conda activate ReScience-PINNs-env
 ```
-
-Go to the `ReScience-PINNs/` folder and run the following command to install the necessary dependencies:
-
- ```
-conda env create --name ReScience-PINNs-env --file ReScience-PINNs.yaml
- ```
 
 To verify the packages installed in your `ReScience-PINNs-env` conda environment, you can use the following command:
 
