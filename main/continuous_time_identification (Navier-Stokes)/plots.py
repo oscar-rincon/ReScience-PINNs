@@ -1,67 +1,61 @@
- 
+# Standard library imports
 import os
-import torch 
-import torch.nn as nn
+import sys
+import warnings
+
+# Suppress warnings to clean up output
+warnings.filterwarnings("ignore")
+
+# Third-party library imports for numerical and scientific computing
 import numpy as np
 import scipy.io
-from functools import partial
-from pyDOE import lhs
 from scipy.interpolate import griddata
+import pandas as pd
+import math
+
+# PyTorch imports for deep learning
+import torch
+import torch.nn as nn
+
+# Imports for design of experiments and statistical analysis
+from pyDOE import lhs
+
+# Matplotlib imports for plotting
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+# Import for creating GIFs from images
 import imageio
-import pandas as pd
-import math
-import sys
-sys.path.insert(0, '../../Utilities/') 
-from plotting import *  # Assuming this file contains custom plotting functions
+
+# Modify the system path to include the Utilities directory for custom plotting functions
+sys.path.insert(0, '../../Utilities/')
+from plotting import *  # Import custom plotting functions
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+
+# Ensure the current directory is in the system path
 sys.path.insert(0, '.')
 
-# Suppress warnings
-import warnings
-warnings.filterwarnings("ignore")
-
-# Create directories to save figures if they don't exist
+# Create directories for saving figures if they do not already exist
 if not os.path.exists('figures'):
     os.makedirs('figures')
 if not os.path.exists('figures_iters'):
-    os.makedirs('figures_iters')    
+    os.makedirs('figures_iters')
 
-# Set seed for reproducibility
-def set_seed(seed: int = 42):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-# Define the neural network architecture
-class NSNN(nn.Module):
-    def __init__(self):
-        super(NSNN, self).__init__()
-        self.linear_in = nn.Linear(3, 20, dtype=torch.float64)
-        self.linear_out = nn.Linear(20, 2, dtype=torch.float64)
-        self.layers = nn.ModuleList([nn.Linear(20, 20, dtype=torch.float64) for _ in range(9)])
-        self.act = nn.Tanh()
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.linear_in(x)
-        for layer in self.layers:
-            x = self.act(layer(x))
-        x = self.linear_out(x)
-        return x     
-
-# Function to compute derivatives
-def derivative(dy: torch.Tensor, x: torch.Tensor, order: int = 1) -> torch.Tensor:
-    for i in range(order):
-        dy = torch.autograd.grad(
-            dy, x, grad_outputs=torch.ones_like(dy), create_graph=True, retain_graph=True
-        )[0]
-    return dy
-
-# Function to plot the solution
 def plot_solution(X_star, u_star, index):
+    """
+    Plots the solution u_star over the domain defined by X_star.
+
+    This function creates a color plot of the solution `u_star` over the 2D domain defined by `X_star`.
+    The domain is discretized into a grid, and the solution `u_star` is interpolated onto this grid.
+    A color map ('jet') is used to visualize the solution values.
+
+    Args:
+        X_star (np.ndarray): The input coordinates of the domain, shape (N, 2), where N is the number of points.
+        u_star (np.ndarray): The solution values at the input coordinates, shape (N,).
+        index (int): The figure index used to create a new figure for the plot.
+
+    """
     lb = X_star.min(0)
     ub = X_star.max(0)
     nn = 200
@@ -72,9 +66,19 @@ def plot_solution(X_star, u_star, index):
     plt.figure(index)
     plt.pcolor(X, Y, U_star, cmap='jet')
     plt.colorbar()
-
-# Function to ensure equal aspect ratio in 3D plots
+ 
 def axisEqual3D(ax):
+    """
+    Adjusts the axes limits of a 3D plot to ensure all axes have equal aspect ratios.
+
+    This function calculates the maximum size among the x, y, and z dimensions of the plot
+    and sets the limits for each axis to be centered around their respective means with a range
+    that ensures all axes have the same length. This is particularly useful for visualizing 3D data
+    where maintaining aspect ratio is important for accurate representation.
+
+    Args:
+        ax (matplotlib.axes._subplots.Axes3DSubplot): The 3D axes object to adjust.
+    """
     extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
     sz = extents[:,1] - extents[:,0]
     centers = np.mean(extents, axis=1)
@@ -83,8 +87,28 @@ def axisEqual3D(ax):
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
-# Function for defining the PDE
 def f(model, x_train_pt, y_train_pt, t_train_pt, lambda_1, lambda_2):
+    """
+    Computes the derivatives and residuals of the PDE using the provided neural network model.
+
+    This function takes spatial (x, y) and temporal (t) training points, along with two parameters (lambda_1, lambda_2),
+    and computes the derivatives of the stream function (psi) and the pressure (p) predicted by the neural network model.
+    It calculates the velocity components (u, v), their temporal derivatives (u_t, v_t), spatial derivatives (u_x, u_y, v_x, v_y),
+    and second-order spatial derivatives (u_xx, u_yy, v_xx, v_yy). Using these, it computes the residuals of the PDE (f_u, f_v)
+    based on the given lambda parameters.
+
+    Args:
+        model (torch.nn.Module): The neural network model that predicts psi and p given (x, y, t).
+        x_train_pt (torch.Tensor): The x coordinates of the training points.
+        y_train_pt (torch.Tensor): The y coordinates of the training points.
+        t_train_pt (torch.Tensor): The time instances of the training points.
+        lambda_1 (float): The first parameter of the PDE, influencing the convection terms.
+        lambda_2 (float): The second parameter of the PDE, influencing the diffusion terms.
+
+    Returns:
+        tuple of torch.Tensor: A tuple containing the velocity components (u, v), pressure (p),
+                               and the residuals of the PDE (f_u, f_v).
+    """
     psi_and_p = model(torch.stack((x_train_pt, y_train_pt, t_train_pt), axis=1).view(-1, 3))
     psi = psi_and_p[:,0:1]
     p = psi_and_p[:,1:2]
@@ -215,7 +239,7 @@ v_train_pt = torch.from_numpy(v_train)
 
 # Load model and test data
 model_path = f'NS_clean.pt'
-model = NSNN()
+model = MLP(input_size=3, output_size=2, hidden_layers=9, hidden_units=20, activation_function=nn.Tanh()) 
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
@@ -356,33 +380,33 @@ savefig('figures/NS.png')
 savefig('figures/NS.pdf')
 
  
-# Definir el límite
-limite = 81_001
+# Define the limit
+limit = 81_001
 step = 1000
 
-# Cargar y graficar modelos
-for iter_num in range(step, limite, step):
-    # Obtener los índices correctos para lambda_1_values_clean
+# Load and plot models
+for iter_num in range(step, limit, step):
+    # Get the correct indices for lambda_1_values_clean
     if iter_num > lambda_1_values_clean['l1'].index[-1]:
         iter_num_clean = math.floor(lambda_1_values_clean['l1'].index[-1] / 1000) * 1000
     else:
         iter_num_clean = iter_num 
 
-    # Obtener los índices correctos para lambda_1_values_noisy
+    # Get the correct indices for lambda_1_values_noisy
     if iter_num > lambda_1_values_noisy['l1'].index[-1]:
         iter_num_noisy = math.floor(lambda_1_values_noisy['l1'].index[-1] / 1000) * 1000
     else:
         iter_num_noisy = iter_num 
 
-    # Obtener los valores lambda
+    # Get lambda values
     lambda_1_value = lambda_1_values_clean['l1'].iloc[iter_num_clean] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][iter_num_clean]
     lambda_2_value = lambda_2_values_clean['l2'].iloc[iter_num_clean] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][iter_num_clean]
     lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[iter_num_noisy] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][iter_num_noisy]
     lambda_2_value_noisy = lambda_2_values_noisy['l2'].iloc[iter_num_noisy] if isinstance(lambda_2_values_noisy['l2'], pd.Series) else lambda_2_values_noisy['l2'][iter_num_noisy]
 
-    # Cargar el modelo
+    # Load the model
     model_path = f'models_iters/NS_clean_{iter_num_clean}.pt'
-    model = NSNN()
+    model = MLP(input_size=3, output_size=2, hidden_layers=9, hidden_units=20, activation_function=nn.Tanh()) 
     model.load_state_dict(torch.load(model_path))
     model.eval()
 
@@ -515,14 +539,14 @@ for iter_num in range(step, limite, step):
      
     image_filename = f'figures_iters/NS_{iter_num}.png'
     savefig(image_filename)
-    #images.append(image_filename) 
+    
            
 # Create GIF
 images = []
 image_dir = 'figures_iters/'
 gif_filename = 'figures/NS.gif'
 
-for i in range(step, limite, step):
+for i in range(step, limit, step):
     image_path = os.path.join(image_dir, f'NS_{i}.png')
     images.append(imageio.imread(image_path))
 

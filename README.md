@@ -48,5 +48,5 @@ conda list -n ReScience-PINNs-env
  
 ## Hardware configuration
 
-The models were trained with a NVIDIA GeForce RTX 4060 GPU card. The summary of the training information such as the computing times is included in the the folder of each simulation.
+The models were trained with a NVIDIA GeForce RTX A2000 GPU card. The summary of the training information such as the computing times is included in the the folder of each simulation.
 

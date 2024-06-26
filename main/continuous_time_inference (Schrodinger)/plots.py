@@ -1,90 +1,94 @@
-import sys
-sys.path.insert(0, '../../Utilities/')
-import torch
-import torch.nn as nn
-import numpy as np
-import scipy.io as sp
-import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.gridspec as gridspec
-from plotting import * 
-import imageio
-import os 
-from scipy.interpolate import griddata
-from pyDOE import lhs
-import warnings
+# Import standard libraries
+import sys  # System-specific parameters and functions
+import os   # Miscellaneous operating system interfaces
+import warnings  # Warning control
 
+# Modify the module search path to include the Utilities folder for custom modules
+sys.path.insert(0, '../../Utilities/')
+
+# Import third-party libraries for numerical and scientific computing
+import torch  # PyTorch library for deep learning
+import numpy as np  # NumPy library for numerical operations
+import scipy.io as sp  # SciPy module for MATLAB file I/O
+import pandas as pd  # Pandas library for data manipulation and analysis
+from scipy.interpolate import griddata  # Interpolation tool from SciPy
+
+# Import third-party libraries for visualization
+import matplotlib.pyplot as plt  # Matplotlib library for plotting
+from mpl_toolkits.axes_grid1 import make_axes_locatable  # Tools for plot arrangement
+import matplotlib.gridspec as gridspec  # Grid layout for subplots
+import imageio  # Library for reading and writing a wide range of image data
+
+# Import utilities for experimental design
+from pyDOE import lhs  # Design of experiments, including Latin Hypercube Sampling
+
+# Import custom modules
+from pinns import *  # Physics Informed Neural Networks utilities
+from plotting import *  # Custom plotting utilities
+
+# Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
 
+# Create directories for storing figures if they do not already exist
 if not os.path.exists('figures'):
     os.makedirs('figures')
-    
 if not os.path.exists('figures_iters'):
-    os.makedirs('figures_iters')  
-
-class SchrodingerNN(nn.Module):
-    def __init__(self):
-        super(SchrodingerNN, self).__init__()
-        self.linear_in = nn.Linear(2, 100)
-        self.linear_out = nn.Linear(100, 2)
-        self.layers = nn.ModuleList([nn.Linear(100, 100) for i in range(5)])
-        self.act = nn.Tanh()
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.linear_in(x)
-        for layer in self.layers:
-            x = self.act(layer(x))
-        x = self.linear_out(x)
-        return x
-    
-
+    os.makedirs('figures_iters')
+     
+# Load training data from CSV file
 data = pd.read_csv('training/Schrodinger_training_data.csv')
 
-fig, axarr = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))  # Dos subplots en una fila
+# Create a figure with 2 subplots arranged horizontally
+fig, axarr = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))
 
-# Subplot 1: Loss
+# Plot 1: Training Loss over Iterations
+# Plotting the loss on a semilogarithmic scale for better visualization
 axarr[0].semilogy(data['Iter'], data['Loss'], label='Loss', color='gray', linewidth=1)
-axarr[0].set_xlabel('Iteration')
-axarr[0].set_ylabel('Loss')
+axarr[0].set_xlabel('Iteration')  # X-axis label
+axarr[0].set_ylabel('Loss')  # Y-axis label
 
-# Subplot 2: L2 Error
+# Plot 2: L2 Error over Iterations
+# Plotting the L2 error on a semilogarithmic scale as well
 axarr[1].semilogy(data['Iter'], data['L2'], label='L2 Error', color='gray', linewidth=1)
-axarr[1].set_xlabel('Iteration')
-axarr[1].set_ylabel(r'$\mathrm{L}_2$')
+axarr[1].set_xlabel('Iteration')  # X-axis label
+axarr[1].set_ylabel(r'$\mathrm{L}_2$')  # Y-axis label using LaTeX for L2
 
-plt.tight_layout()  # Ajuste de diseño para que los subplots no se superpongan
+# Adjust layout to prevent subplot overlap
+plt.tight_layout()
 
+# Save the figure to a PDF in the specified directory
 plt.savefig('figures/Schrodinger_training_curves.pdf')
 
-
+# Define the lower and upper bounds for the domain
 lb = np.array([-5.0, 0.0])
 ub = np.array([5.0, np.pi/2])
-    
+
+# Specify the number of initial, boundary, and collocation points
 N0 = 50  
 N_b = 50  
 N_f = 20_000 
 
+# Load the dataset
 data = sp.loadmat('../Data/NLS.mat')
-x_0 = torch.from_numpy(data['x'])
+
+# Prepare initial condition data
+x_0 = torch.from_numpy(data['x']).flatten().T
 x_0.requires_grad = True
-x_0 = x_0.flatten().T
-t = torch.from_numpy(data['tt'])
+t = torch.from_numpy(data['tt']).flatten().T
 t.requires_grad = True
-t = t.flatten().T
-
 h = torch.from_numpy(data['uu'])
-
 u_0 = torch.real(h)[:, 0]
 v_0 = torch.imag(h)[:, 0]
 h_0 = torch.stack((u_0, v_0), axis=1)
 
+# Generate collocation points using Latin Hypercube Sampling
 c_f = lb + (ub-lb)*lhs(2, N_f)
 x_f = torch.from_numpy(c_f[:, 0])
 x_f.requires_grad = True
 t_f = torch.from_numpy(c_f[:, 1])
 t_f.requires_grad = True
 
+# Randomly select points for initial and boundary conditions
 idx_0 = np.random.choice(x_0.shape[0], N0, replace=False)
 x_0 = x_0[idx_0]
 u_0 = u_0[idx_0]
@@ -94,24 +98,28 @@ h_0 = h_0[idx_0]
 idx_b = np.random.choice(t.shape[0], N_b, replace=False)
 t_b = t[idx_b]
 
-X, T = torch.meshgrid(torch.tensor(data['x'].flatten()[:]), torch.tensor(data['tt'].flatten()[:]))
+# Prepare the meshgrid for plotting and evaluation
+X, T = torch.meshgrid(torch.tensor(data['x'].flatten()), torch.tensor(data['tt'].flatten()))
 xcol = X.reshape(-1, 1)
 tcol = T.reshape(-1, 1)
-X_star = torch.cat((xcol, tcol), 1).float()   
+X_star = torch.cat((xcol, tcol), 1).float()
+
+# Extract exact solutions for comparison
 Exact = data['uu']
 Exact_u = np.real(Exact)
 Exact_v = np.imag(Exact)
-Exact_h = np.sqrt(Exact_u**2 + Exact_v**2) 
-h_star = Exact_h.flatten()[:] 
+Exact_h = np.sqrt(Exact_u**2 + Exact_v**2)
+h_star = Exact_h.flatten()
 
-t = data['tt'].flatten()[:,None]
-x = data['x'].flatten()[:,None]
+# Further preparation for initial and boundary conditions
+t = data['tt'].flatten()[:, None]
+x = data['x'].flatten()[:, None]
 idx_x = np.random.choice(x.shape[0], N0, replace=False)
 idx_t = np.random.choice(t.shape[0], N_b, replace=False)
-    
-    
-model = SchrodingerNN()
-model_path = f'Schrodinger.pt'
+
+# Initialize and load the pre-trained model
+model = MLP(input_size=2, output_size=2, hidden_layers=5, hidden_units=100, activation_function=nn.Tanh())
+model_path = 'Schrodinger.pt'
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
@@ -233,12 +241,11 @@ mat_file = '../Data/NLS.mat'
 model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/Schrodinger.gif'
-
 limit = 7401
 step = 100
 
 for i in range(step, limit, step):
-    model = SchrodingerNN()
+    model = MLP(input_size=2, output_size=2, hidden_layers=5, hidden_units=100, activation_function=nn.Tanh())
     model_path = os.path.join(model_dir, f'Schrodinger_{i}.pt')
     model.load_state_dict(torch.load(model_path))
     model.eval()

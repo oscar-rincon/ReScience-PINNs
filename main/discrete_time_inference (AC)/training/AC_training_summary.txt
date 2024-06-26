@@ -1,6 +1,0 @@
-Adam training time: 0.35 seconds
-LBFGS training time: 270.98 seconds
-Total training time: 271.33 seconds
-Total iterations: 9855
-Final Loss: 0.013509
-Final L2: 0.004491

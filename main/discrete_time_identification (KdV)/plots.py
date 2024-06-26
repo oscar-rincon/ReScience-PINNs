@@ -1,57 +1,64 @@
-import os 
+import os
 import sys
-sys.path.insert(0, '../../Utilities/')
+import time
+import warnings
+import math
 
+import numpy as np
+import pandas as pd
+import scipy.io as sp
 import torch
 import torch.nn as nn
-import numpy as np
 import matplotlib.pyplot as plt
-import time
-import scipy.io as sp
-import scipy.io
-from plotting import *
+from matplotlib.gridspec import gridspec
 from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.gridspec as gridspec
-from functools import partial
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import pandas as pd
 import imageio
-import math
-import warnings
 
+# Custom imports
+sys.path.insert(0, '../../Utilities/')
+from plotting import *
+from pinns import *  # Physics Informed Neural Networks utilities
+
+# Suppress warnings
 warnings.filterwarnings("ignore")
 
-
-if not os.path.exists('figures'):
-    os.makedirs('figures')
-    
-if not os.path.exists('figures_iters'):
-    os.makedirs('figures_iters')    
-    
-
-class KdVNN(nn.Module):
-    def __init__(self):
-        super(KdVNN, self).__init__()
-        self.linear_in = nn.Linear(1, 50, dtype=torch.float64)
-        self.linear_out = nn.Linear(50, 50, dtype=torch.float64)
-        self.layers = nn.ModuleList([nn.Linear(50, 50, dtype=torch.float64) for _ in range(5)])
-        self.act = nn.Tanh()
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.linear_in(x)
-        for layer in self.layers:
-            x = self.act(layer(x))
-        x = self.linear_out(x)
-        return x
-
+# Create directories for figures if they do not exist
+directories = ['figures', 'figures_iters']
+for directory in directories:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+ 
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor):
+    """
+    Computes the first-order forward gradient of a given tensor with respect to another tensor.
+
+    Args:
+        dy (torch.Tensor): The tensor whose gradient will be computed.
+        x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
+
+    Returns:
+        torch.Tensor: The computed first-order forward gradient.
+    """
     z = torch.ones(dy.shape).requires_grad_(True)
     g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]
     return torch.autograd.grad(g, z, grad_outputs=torch.ones(g.shape), create_graph=True)[0]
 
-
-
 def net_U0(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha):
+    """
+    Computes the prediction of U0 using the given neural network model and parameters.
+ 
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x_pt (torch.Tensor): The input tensor for which the prediction is made.
+        lambda_1 (float): The coefficient for the non-linear term in the KdV equation.
+        lambda_2 (float): The log-transformed coefficient for the third spatial derivative term in the KdV equation.
+        dt (float): The time step size used in the integration.
+        IRK_alpha (torch.Tensor): The IRK weights used in the integration.
+
+    Returns:
+        torch.Tensor: The predicted value of U0 after one time step.
+    """    
     lambda_2 = torch.exp(lambda_2)
     U = model(x_pt)
     U_x = fwd_gradients_0(U, x_pt)
@@ -62,6 +69,21 @@ def net_U0(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha):
     return U0
  
 def net_U1(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
+    """
+    Computes the prediction of U1 using the given neural network model and parameters.
+
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x_pt (torch.Tensor): The input tensor for which the prediction is made.
+        lambda_1 (float): The coefficient for the non-linear term in the KdV equation.
+        lambda_2 (float): The log-transformed coefficient for the third spatial derivative term in the KdV equation.
+        dt (float): The time step size used in the integration.
+        IRK_alpha (torch.Tensor): The IRK weights used in the integration for alpha coefficients.
+        IRK_beta (torch.Tensor): The IRK weights used in the integration for beta coefficients.
+
+    Returns:
+        torch.Tensor: The predicted value of U1 after one time step, adjusted by IRK weights.
+    """    
     lambda_2 = torch.exp(lambda_2)
     U = model(x_pt)
     U_x = fwd_gradients_0(U, x_pt)
@@ -70,7 +92,6 @@ def net_U1(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     F = -lambda_1*U*U_x - lambda_2*U_xxx
     U1 = U + dt*torch.matmul(F, (IRK_beta-IRK_alpha).T)
     return U1 
-
 
 # Load the data
 lambda_1_values_clean = pd.read_csv('training/lambda_1s_clean.csv')
@@ -88,7 +109,6 @@ axarr.semilogy(KdV_training_data_clean['Iter'], KdV_training_data_clean['Loss'],
 
 # Plot noisy loss curve
 axarr.semilogy(KdV_training_data_noisy['Iter'], KdV_training_data_noisy['Loss'], label='Noisy', color='red', linewidth=1)
-
 axarr.set_xlabel('Iteration')
 axarr.set_ylabel('Loss')
 axarr.legend(frameon=False)
@@ -169,7 +189,7 @@ lambda_2_value_noisy = lambda_2_values_noisy['Lambda2'].iloc[-1] if isinstance(l
 images = []
 
 model_path = f'KdV_clean.pt'
-model = KdVNN()
+model = MLP(input_size=1, output_size=50, hidden_layers=5, hidden_units=50, activation_function=nn.Tanh())
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
@@ -191,7 +211,7 @@ u1 = Exact[idx_x,idx_t + skip][:,None]
 u1 = u1 + noise*np.std(u1)*np.random.randn(u1.shape[0], u1.shape[1])
 
 model_path = f'KdV_noisy.pt'
-model = KdVNN()
+model = MLP(input_size=1, output_size=50, hidden_layers=5, hidden_units=50, activation_function=nn.Tanh())
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
