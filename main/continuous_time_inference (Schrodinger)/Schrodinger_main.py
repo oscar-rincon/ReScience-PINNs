@@ -210,7 +210,7 @@ def train_lbfgs(model,  x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
         This closure computes the loss and gradients at each optimization step.
     """
     optimizer = torch.optim.LBFGS(model.parameters(),
-                                    lr=0.001,
+                                    lr=1,
                                     max_iter=num_iter,
                                     max_eval=num_iter,
                                     tolerance_grad=1e-5,
@@ -307,7 +307,7 @@ if __name__== "__main__":
         
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=0)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")

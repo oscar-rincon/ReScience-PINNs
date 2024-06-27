@@ -45,6 +45,88 @@ To verify the packages installed in your `ReScience-PINNs-env` conda environment
 conda list -n ReScience-PINNs-env
  ```
 
+## Running Scripts
+
+**Run all scripts in sequence:**
+
+   ```bash
+   make all
+   ```
+
+This command will execute the following scripts sequentially:
+
+> - Schrodinger_main.py
+> - Schrodinger_plots.py
+> - AC_main.py
+> - AC_plots.py
+> - NS_clean_main.py
+> - NS_noisy_main.py
+> - NS_plots.py
+> - kdV_clean_main.py
+> - kdV_noisy_main.py
+> - kdV_plots.py   
+
+Or to run the scripts individually.
+
+Run Schrodinger_main.py:
+
+```bash
+make run_Schrodinger_main
+```
+
+Run Schrodinger_plots.py:
+
+```bash
+make run_Schrodinger_plots
+```
+
+Run AC_main.py:
+
+```bash
+make run_AC_main
+```
+
+Run AC_plots.py:
+
+```bash
+make run_AC_plots
+```
+
+Run NS_clean_main.py:
+
+```bash
+make run_NS_clean_main
+```
+
+Run NS_noisy_main.py:
+
+```bash
+make run_NS_noisy_main
+```
+
+Run NS_plots.py:
+
+```bash
+make run_NS_plots
+```
+
+Run kdV_clean_main.py:
+
+```bash
+make run_kdV_clean_main
+```
+
+Run kdV_noisy_main.py:
+
+```bash
+make run_kdV_noisy_main
+```
+
+Run kdV_plots.py:
+
+```bash
+make run_kdV_plots
+```
  
 ## Hardware configuration
 

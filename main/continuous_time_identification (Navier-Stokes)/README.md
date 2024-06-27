@@ -17,3 +17,33 @@
 - Total number of iterations: $5.9526 \times 10^4$
 - Error in estimating $\lambda_{1}$: $0.34$%
 - Error in estimating $\lambda_{2}$: $7.67$%
+
+## Running Navier–Stokes equation Scripts
+
+
+```bash
+make all
+```
+
+or
+
+```bash
+make run_NS_clean_main
+```
+
+```bash
+make run_NS_noisy_main
+```
+
+and then 
+
+
+```bash
+make run_NS_plots
+```
+
+to clean generated files:
+
+```bash
+make clean
+```
