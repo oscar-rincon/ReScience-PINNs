@@ -5,7 +5,18 @@ import warnings
 
 # Extend system path to include the Utilities folder for additional modules
 import sys
-sys.path.insert(0, '../../Utilities/')
+# Determine the current directory of this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
+
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Adjust this import based on your actual module structure
 
 # Third-party imports
 import numpy as np
@@ -13,10 +24,7 @@ import scipy.io as sp
 import torch
 import torch.nn as nn
 from functools import partial
-
-# Local application imports
-from pinns import *  # Physics Informed Neural Networks utilities
-
+ 
 # Disable all warnings (not recommended for production code)
 warnings.filterwarnings("ignore")
 
@@ -110,7 +118,7 @@ def closure(model, optimizer, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1,
     pred = U1_pred[:, -1].detach().cpu().numpy()
     error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)
     results.append([iter, loss.item(), error])
-    if iter % 100 == 0:
+    if iter % 1000 == 0:
         torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
@@ -135,7 +143,7 @@ def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results
         The function assumes the presence of a global variable `iter` used for tracking the
         iteration count across different training sessions.
     """
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     global iter
     for i in range(1, num_iter + 1):
         iter += 1
@@ -147,7 +155,7 @@ def train_adam(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results
         pred = U1_pred[:, -1].detach().cpu().numpy()
         error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)
         results.append([iter, loss.item(), error])
-        if i % 100 == 0:
+        if i % 1000 == 0:
             torch.save(model.state_dict(), f'models_iters/AC_{iter}.pt')
             print(f"Adam - Iter: {i} - Loss: {loss.item()} - L2: {error}")
           
@@ -175,7 +183,7 @@ def train_lbfgs(model, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, result
                                   max_iter=num_iter,
                                   max_eval=num_iter,
                                   history_size=100,
-                                  tolerance_grad=1e-5,
+                                  tolerance_grad=1e-7,
                                   line_search_fn='strong_wolfe',
                                   tolerance_change=1.0 * np.finfo(float).eps)
     closure_fn = partial(closure, model, optimizer, x_0, x_1, dt, IRK_weights, U0_real, Exact, idx_t1, results)
@@ -258,14 +266,14 @@ if __name__ == "__main__":
        
     # Training with Adam
     start_time_adam = time.time()
-    train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=0)
+    train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=10_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
     
     # Training with LBFGS
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=100_000)
+    train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")

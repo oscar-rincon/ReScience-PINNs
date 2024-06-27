@@ -1,7 +1,21 @@
 # Extend system path to include the Utilities folder for additional modules
 import sys
-sys.path.insert(0, '../../Utilities/')
+import os
+import warnings
+# Determine the current directory of this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
 
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+from plotting import *  # Importing custom plotting utilities
+ 
 # Import necessary libraries for deep learning, numerical computations, and data manipulation
 import torch
 import torch.nn as nn  # Neural network module
@@ -10,8 +24,7 @@ import scipy.io as sp  # For loading MATLAB files
 import pandas as pd  # For handling data structures
 import matplotlib.pyplot as plt  # For plotting
 from mpl_toolkits.axes_grid1 import make_axes_locatable  # For advanced plot formatting
-from pinns import *  # Importing Physics Informed Neural Networks utilities
-from plotting import *  # Importing custom plotting utilities
+
 import imageio  # For reading and writing images
 import os  # For handling file and directory paths
 
@@ -49,38 +62,38 @@ plt.savefig('figures/AC_training_curves.pdf')
 
 # Define constants and load data
 q = 100
-lb = np.array([-1.0], dtype=np.float64)  # Lower bound
-ub = np.array([1.0], dtype=np.float64)   # Upper bound
+lb = np.array([-1.0], dtype=np.float32)  # Lower bound
+ub = np.array([1.0], dtype=np.float32)   # Upper bound
 N = 200  # Number of points
 iter = 0  # Initial iteration
 data = sp.loadmat('../Data/AC.mat')  # Load dataset
-t = data['tt'].flatten()[:, None].astype(np.float64)  # Time data
-x = data['x'].flatten()[:, None].astype(np.float64)  # Spatial data
-Exact = np.real(data['uu']).T.astype(np.float64)  # Exact solution
+t = data['tt'].flatten()[:, None].astype(np.float32)  # Time data
+x = data['x'].flatten()[:, None].astype(np.float32)  # Spatial data
+Exact = np.real(data['uu']).T.astype(np.float32)  # Exact solution
 idx_t0 = 20  # Initial time index
 idx_t1 = 180  # Final time index
-dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float64)  # Time step
+dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float32)  # Time step
 noise_u0 = 0.0  # Initial noise level
 
 # Select random points for initial condition
 idx_x = np.random.choice(Exact.shape[1], N, replace=False)
 x0 = x[idx_x,:]
-x0 = torch.from_numpy(x0).to(torch.float64)
+x0 = torch.from_numpy(x0).to(torch.float32)
 x0.requires_grad = True
 u0 = Exact[idx_t0:idx_t0+1,idx_x].T
 u0 = u0 + noise_u0*np.std(u0)*np.random.randn(u0.shape[0], u0.shape[1])
-u0 = torch.from_numpy(u0).to(torch.float64)
+u0 = torch.from_numpy(u0).to(torch.float32)
 
 # Define boundary conditions
-x1 = torch.from_numpy(np.vstack((lb, ub))).to(torch.float64)
+x1 = torch.from_numpy(np.vstack((lb, ub))).to(torch.float32)
 x1.requires_grad = True
 
 # Load IRK weights
-tmp = np.loadtxt('../../Utilities/IRK_weights/Butcher_IRK%d.txt' % (q), ndmin=2).astype(np.float64)
-IRK_weights = torch.from_numpy(np.reshape(tmp[0:q**2+q], (q+1, q))).to(torch.float64).T
+tmp = np.loadtxt('../../Utilities/IRK_weights/Butcher_IRK%d.txt' % (q), ndmin=2).astype(np.float32)
+IRK_weights = torch.from_numpy(np.reshape(tmp[0:q**2+q], (q+1, q))).to(torch.float32).T
 
 # Prepare data for model prediction
-x_star = torch.from_numpy(x).to(torch.float64)
+x_star = torch.from_numpy(x).to(torch.float32)
 
 # Load and evaluate model
 model_path = f'AC.pt'
@@ -148,8 +161,8 @@ savefig(image_filename)
 images = []
 
 # Definir límite y paso para iteraciones
-limit = 9_801
-step = 100
+limit = 16_000
+step = 1000
 
 # Cargar y graficar modelos para cada iteración
 for iter_num in range(step, limit, step):
@@ -191,14 +204,14 @@ for iter_num in range(step, limit, step):
     # Configurar segunda grilla de subplots
     gs1 = plt.GridSpec(1, 2)
     gs1.update(top=1-1/2-0.05, bottom=0.15, left=0.15, right=0.85, wspace=0.5)
-    
+    #print(t[idx_t1])
     # Subplot para tiempo t0
     ax = plt.subplot(gs1[0, 0])
     ax.plot(x, Exact[idx_t0,:], 'b-', linewidth=2) 
     ax.plot(x0.detach().numpy(), u0.detach().numpy(), 'rx', linewidth=2, label='Data')      
     ax.set_xlabel('$x$')
     ax.set_ylabel('$u(t,x)$')    
-    ax.set_title(f'$t = {t[idx_t0]:.2f}$', fontsize=10)
+    ax.set_title(f'$t = {t[idx_t0][0]:.2f}$', fontsize=10)
     ax.set_xlim([lb-0.1, ub+0.1])
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, frameon=False)
 
@@ -208,7 +221,7 @@ for iter_num in range(step, limit, step):
     ax.plot(x_star.detach().numpy(), U1_pred[:, -1].detach().numpy(), 'r--', linewidth=2, label='Prediction')
     ax.set_xlabel('$x$')
     ax.set_ylabel('$u(t,x)$')
-    ax.set_title(f'$t = {t[idx_t1]:.2f}$', fontsize=10)
+    ax.set_title(f'$t = {t[idx_t1][0]:.2f}$', fontsize=10)
     ax.set_xlim([lb-0.1, ub+0.1])
     ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
     

@@ -5,7 +5,9 @@ import time  # Time access and conversions
 import warnings  # Warning control
 
 # Modify the module search path, so we can import utilities from a specific folder
-sys.path.insert(0, '../../Utilities/')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
+
 
 # Import third-party libraries
 import torch  # PyTorch library for deep learning
@@ -148,7 +150,7 @@ def closure(model, optimizer, x_f, t_f, x_0, u_0, v_0, h_0, t):
     h_pred = (pred[:, 0]**2 + pred[:, 1]**2)**0.5
     error = np.linalg.norm(h_star-h_pred.cpu().detach().numpy(),2)/np.linalg.norm(h_star,2) 
     results.append([iter, loss.item(), error])    
-    if iter % 100 == 0:
+    if iter % 1000 == 0:
         torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss
@@ -185,7 +187,7 @@ def train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t, num_iter=50_000):
         error = np.linalg.norm(h_star-h_pred.cpu().detach().numpy(),2)/np.linalg.norm(h_star,2) 
         results.append([iter, loss.item(), error])
         iter += 1
-        if iter % 100 == 0:
+        if iter % 1000 == 0:
             torch.save(model.state_dict(), f'models_iters/Schrodinger_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
 
@@ -307,7 +309,7 @@ if __name__== "__main__":
         
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=50_000)
+    train_adam(model, x_f, t_f, x_0, u_0, v_0, h_0, t_b, num_iter=10_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
