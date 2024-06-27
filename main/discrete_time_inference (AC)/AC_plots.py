@@ -161,7 +161,7 @@ savefig(image_filename)
 images = []
 
 # Definir límite y paso para iteraciones
-limit = 16_000
+limit = 20_000
 step = 1000
 
 # Cargar y graficar modelos para cada iteración
