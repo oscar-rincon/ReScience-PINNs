@@ -1,7 +1,21 @@
-import os
 import sys
+import os
 import time
 import warnings
+# Determine the current directory of this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
+
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+from plotting import *  # Importing custom plotting utilities
+
 import math
 
 import numpy as np
@@ -15,10 +29,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import imageio
 
-# Custom imports
-sys.path.insert(0, '../../Utilities/')
-from plotting import *
-from pinns import *  # Physics Informed Neural Networks utilities
+ 
 
 # Suppress warnings
 warnings.filterwarnings("ignore")

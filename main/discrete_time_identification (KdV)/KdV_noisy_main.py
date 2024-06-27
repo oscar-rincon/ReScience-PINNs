@@ -1,7 +1,20 @@
-import os
 import sys
+import os
 import time
 import warnings
+# Determine the current directory of this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
+
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+from plotting import *  # Importing custom plotting utilities
 
 import numpy as np
 import scipy.io
@@ -9,14 +22,6 @@ import torch
 import torch.nn as nn
 from functools import partial
 
-# Suppress warnings
-warnings.filterwarnings("ignore")
-
-# Add utility folder to system path for importing custom modules
-sys.path.insert(0, '../../Utilities/')
-
-# Import custom modules
-from pinns import *  # Physics Informed Neural Networks utilities
 
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
     """
@@ -128,7 +133,7 @@ def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta,
     Note:
         The function uses global variables to store the iteration count and training results for logging purposes.
     """    
-    optimizer = torch.optim.Adam(list(model.parameters()) + [lambda_1, lambda_2], lr=1e-5)
+    optimizer = torch.optim.Adam(list(model.parameters()) + [lambda_1, lambda_2], lr=1e-3)
     global iter
     for i in range(1, num_iter+1):
         iter += 1 
@@ -141,7 +146,7 @@ def train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta,
         error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0) / 1.0 * 100
         error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - 0.0025) / 0.0025 * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
-        if i % 100 == 0:
+        if i % 1000 == 0:
             torch.save(model.state_dict(), f'models_iters/KdV_noisy_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
 
@@ -171,7 +176,7 @@ def train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta
                                   max_iter=num_iter,
                                   max_eval=num_iter,
                                   history_size=100,
-                                  tolerance_grad=1e-5,
+                                  tolerance_grad=1e-7,
                                   line_search_fn='strong_wolfe',
                                   tolerance_change=1.0 * np.finfo(float).eps)
     closure_fn = partial(closure, model, optimizer, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt)
@@ -288,14 +293,14 @@ if __name__ == "__main__":
     
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=0)
+    train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")    
     
     # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=100_000)
+    train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
