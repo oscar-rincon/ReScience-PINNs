@@ -1,13 +1,21 @@
-# Import standard libraries
-import sys  # System-specific parameters and functions
-import os   # Miscellaneous operating system interfaces
-import time  # Time access and conversions
-import warnings  # Warning control
-
-# Modify the module search path, so we can import utilities from a specific folder
+import sys
+import os
+import time
+import warnings
+# Determine the current directory of this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 utilities_dir = os.path.join(current_dir, '../../Utilities')
 
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+from plotting import *  # Importing custom plotting utilities
+ 
 
 # Import third-party libraries
 import torch  # PyTorch library for deep learning
@@ -18,9 +26,6 @@ import scipy.io as sp  # SciPy module for MATLAB file I/O
 # Import additional utilities
 from functools import partial  # Higher-order functions and operations on callable objects
 from pyDOE import lhs  # Design of experiments for Python, including Latin Hypercube Sampling
-
-# Import custom modules
-from pinns import *  # Physics Informed Neural Networks utilities
 
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")

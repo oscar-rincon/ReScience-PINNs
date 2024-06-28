@@ -255,10 +255,12 @@ if __name__ == "__main__":
     # Sample data points for initial and boundary conditions
     idx_x = np.random.choice(Exact.shape[0], N0, replace=False)
     x0 = x_star[idx_x,:]
-    u0 = Exact[idx_x,idx_t][:,None] + noise * np.std(u0) * np.random.randn(u0.shape[0], u0.shape[1])        
+    u0 = Exact[idx_x,idx_t][:,None] 
+    u0 = u0 + noise * np.std(u0) * np.random.randn(u0.shape[0], u0.shape[1])        
     idx_x = np.random.choice(Exact.shape[0], N1, replace=False)
     x1 = x_star[idx_x,:]
-    u1 = Exact[idx_x,idx_t + skip][:,None] + noise * np.std(u1) * np.random.randn(u1.shape[0], u1.shape[1])
+    u1 = Exact[idx_x,idx_t + skip][:,None] 
+    u1 = u1 + noise * np.std(u1) * np.random.randn(u1.shape[0], u1.shape[1])
     dt = torch.tensor((t_star[idx_t+skip] - t_star[idx_t]).item()).to(device)  # Time step size
             
     # Define domain bounds

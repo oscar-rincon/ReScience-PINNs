@@ -47,23 +47,23 @@ run_NS_plots:
 	@python main/continuous_time_identification\ \(Navier-Stokes\)/NS_plots.py
 	@echo "Finished NS_plots.py..."
 
-# Target to run kdV_clean_main.py
+# Target to run KdV_clean_main.py
 run_kdV_clean_main:
-	@echo "Running kdV_clean_main.py..."
-	@python main/discrete_time_identification\ \(KdV\)/kdV_clean_main.py
-	@echo "Finished kdV_clean_main.py..."
+	@echo "Running KdV_clean_main.py..."
+	@python main/discrete_time_identification\ \(KdV\)/KdV_clean_main.py
+	@echo "Finished KdV_clean_main.py..."
 
-# Target to run kdV_noisy_main.py
+# Target to run KdV_noisy_main.py
 run_kdV_noisy_main:
 	@echo "Running kdV_noisy_main.py..."
-	@python main/discrete_time_identification\ \(KdV\)/kdV_noisy_main.py
-	@echo "Finished kdV_noisy_main.py..."
+	@python main/discrete_time_identification\ \(KdV\)/KdV_noisy_main.py
+	@echo "Finished KdV_noisy_main.py..."
 
-# Target to run kdV_plots.py
+# Target to run KdV_plots.py
 run_kdV_plots:
 	@echo "Running kdV_plots.py..."
-	@python main/discrete_time_identification\ \(KdV\)/kdV_plots.py
-	@echo "Finished kdV_plots.py..."
+	@python main/discrete_time_identification\ \(KdV\)/KdV_plots.py
+	@echo "Finished KdV_plots.py..."
 
 # Clean up generated files
 clean:

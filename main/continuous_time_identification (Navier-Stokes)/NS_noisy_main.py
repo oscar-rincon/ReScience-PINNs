@@ -1,21 +1,29 @@
 # Standard library imports
-import os
 import sys
+import os
 import time
-from functools import partial
+import warnings
+# Determine the current directory of this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
 
-# Modify the module search path to import utilities from a specific folder
-sys.path.insert(0, '../../Utilities/')
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+from plotting import *  # Importing custom plotting utilities
+ 
 
 # Third-party imports
 import torch
 import torch.nn as nn
 import numpy as np
 import scipy.io
-
-# Local application imports
-from pinns import *  # Importing Physics Informed Neural Networks utilities
-
+ 
 # Disable all warnings (not recommended for production code)
 import warnings
 warnings.filterwarnings("ignore")

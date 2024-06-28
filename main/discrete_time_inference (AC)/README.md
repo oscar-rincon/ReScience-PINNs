@@ -4,9 +4,9 @@
 
 ## Summary
  
-- Total training time: $2.713 \times 10^2$ seconds
-- Total number of iterations: $9.851 \times 10^3$
-- $\mathbb{L}_2$: $4.491 \times 10^{-3}$
+- Total training time: $5.652 \times 10^2$ seconds
+- Total number of iterations: $20.968 \times 10^3$
+- $\mathbb{L}_2$: $1.307 \times 10^{-3}$
 
 ## Running Allen–Cahn Scripts
 

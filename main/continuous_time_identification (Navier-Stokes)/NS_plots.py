@@ -1,8 +1,21 @@
-# Standard library imports
-import os
 import sys
+import os
+import time
 import warnings
+# Determine the current directory of this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+utilities_dir = os.path.join(current_dir, '../../Utilities')
 
+# Change the working directory to the script's directory
+os.chdir(current_dir)
+
+# Modify the module search path to include utilities directory
+sys.path.insert(0, utilities_dir)
+
+# Now import the pinns module
+from pinns import *  # Importing Physics Informed Neural Networks utilities
+from plotting import *  # Importing custom plotting utilities
+ 
 # Suppress warnings to clean up output
 warnings.filterwarnings("ignore")
 
@@ -28,13 +41,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 # Import for creating GIFs from images
 import imageio
 
-# Modify the system path to include the Utilities directory for custom plotting functions
-sys.path.insert(0, '../../Utilities/')
-from plotting import *  # Import custom plotting functions
-from pinns import *  # Importing Physics Informed Neural Networks utilities
-
-# Ensure the current directory is in the system path
-sys.path.insert(0, '.')
 
 # Create directories for saving figures if they do not already exist
 if not os.path.exists('figures'):
