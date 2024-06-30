@@ -1,7 +1,7 @@
-Adam training time: 0.35 seconds
-LBFGS training time: 138.12 seconds
-Total training time: 138.47 seconds
-Total iterations: 8239
-Final Loss: 1.219428
-Percentage Error Lambda 1: 0.193846%
-Percentage Error Lambda 2: 0.179873%
+Adam training time: 989.91 seconds
+LBFGS training time: 90.06 seconds
+Total training time: 1079.98 seconds
+Total iterations: 53235
+Final Loss: 0.832839
+Percentage Error Lambda 1: 0.118560%
+Percentage Error Lambda 2: 0.047737%

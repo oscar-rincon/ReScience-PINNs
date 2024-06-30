@@ -248,8 +248,8 @@ mat_file = '../Data/NLS.mat'
 model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/Schrodinger.gif'
-limit = 7401
-step = 100
+limit = 53000
+step = 1000
 
 for i in range(step, limit, step):
     model = MLP(input_size=2, output_size=2, hidden_layers=5, hidden_units=100, activation_function=nn.Tanh())

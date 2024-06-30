@@ -152,8 +152,8 @@ def train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_p
                                   lr=1,
                                   max_iter=num_iter,
                                   max_eval=num_iter,
-                                  tolerance_grad=1e-5,
-                                  history_size=150,
+                                  tolerance_grad=1e-7,
+                                  history_size=100,
                                   tolerance_change=1.0 * np.finfo(float).eps,
                                   line_search_fn="strong_wolfe")
  
@@ -276,7 +276,7 @@ if __name__== "__main__":
     
     # Training with Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=0)
+    train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=200_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")

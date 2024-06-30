@@ -20,11 +20,14 @@ import math
 
 import numpy as np
 import pandas as pd
+import scipy
 import scipy.io as sp
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import gridspec
+#from matplotlib.gridspec import gridspec
+import matplotlib.gridspec as gridspec  # Grid layout for subplots
+
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import imageio
@@ -181,16 +184,16 @@ ub = x_star.max(0)
 # Load IRK weights
 tmp = np.float32(np.loadtxt('../../Utilities/IRK_weights/Butcher_IRK%d.txt' % (q), ndmin = 2))
 weights =  np.reshape(tmp[0:q**2+q], (q+1, q))    
-IRK_alpha = torch.from_numpy(weights[0:-1,:]).double()
-IRK_beta = torch.from_numpy(weights[-1:,:]).double()       
+IRK_alpha = torch.from_numpy(weights[0:-1,:])#.double()
+IRK_beta = torch.from_numpy(weights[-1:,:])#.double()       
 IRK_times = tmp[q**2+q:]
     
-x0_pt = torch.from_numpy(x0) 
+x0_pt = torch.from_numpy(x0).float() 
 x0_pt.requires_grad = True    
-x1_pt = torch.from_numpy(x1) 
+x1_pt = torch.from_numpy(x1).float() 
 x1_pt.requires_grad = True
-u0_pt = torch.from_numpy(u0) 
-u1_pt = torch.from_numpy(u1)     
+u0_pt = torch.from_numpy(u0).float() 
+u1_pt = torch.from_numpy(u1).float()     
  
 lambda_1_value = lambda_1_values_clean['Lambda1'].iloc[-1] if isinstance(lambda_1_values_clean['Lambda1'], pd.Series) else lambda_1_values_clean['Lambda1'][-1]
 lambda_2_value = lambda_2_values_clean['Lambda2'].iloc[-1] if isinstance(lambda_2_values_clean['Lambda2'], pd.Series) else lambda_2_values_clean['Lambda2'][-1]
@@ -299,8 +302,8 @@ gif_filename = 'figures/KdV.gif'
 
 
 # Definir el límite
-limite = 10_501
-step = 100
+limite = 61_001
+step = 1000
 # Cargar y graficar modelos
 for iter_num in range(step, limite, step):
     # Obtener los índices correctos para lambda_1_values_clean

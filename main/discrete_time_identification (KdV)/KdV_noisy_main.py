@@ -251,12 +251,12 @@ if __name__ == "__main__":
 
     # Sample initial conditions with noise for training
     idx_x = np.random.choice(Exact.shape[0], N0, replace=False)
-    x0 = x_star[idx_x,:]
+    x0 = x_star[idx_x,:].float()
     u0 = Exact[idx_x,idx_t][:,None] 
     u0 = u0 + noise * np.std(u0) * np.random.randn(u0.shape[0], u0.shape[1])
 
     idx_x = np.random.choice(Exact.shape[0], N1, replace=False)
-    x1 = x_star[idx_x,:]
+    x1 = x_star[idx_x,:].float()
     u1 = Exact[idx_x,idx_t + skip][:,None] 
     u1= u1 + noise * np.std(u1) * np.random.randn(u1.shape[0], u1.shape[1])
 
