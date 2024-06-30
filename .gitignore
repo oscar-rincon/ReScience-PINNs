@@ -480,3 +480,22 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+
+# Ignore all PNG files and model files in specific subfolders
+
+# Continuous Time Inference (Schrodinger)
+/main/continuous_time_inference\ \(Schrodinger\)/figures_iters/*.png
+/main/continuous_time_inference\ \(Schrodinger\)/models_iters/*.pt
+
+# Discrete Time Inference (AC)
+/main/discrete_time_inference\ \(AC\)/figures_iters/*.png
+/main/discrete_time_inference\ \(AC\)/models_iters/*.pt
+
+# Continuous Time Identification (Navier-Stokes)
+/main/continuous_time_identification\ \(Navier-Stokes\)/figures_iters/*.png
+/main/continuous_time_identification\ \(Navier-Stokes\)/models_iters/*.pt
+
+# Discrete Time Identification (KdV)
+/main/discrete_time_identification\ \(KdV\)/figures_iters/*.png
+/main/discrete_time_identification\ \(KdV\)/models_iters/*.pt
