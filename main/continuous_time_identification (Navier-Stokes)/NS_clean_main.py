@@ -22,6 +22,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import scipy.io
+from functools import partial  # Higher-order functions and operations on callable objects
 
  
 # Disable all warnings (not recommended for production code)

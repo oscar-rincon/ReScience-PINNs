@@ -6,17 +6,17 @@
 
 ### Clean data
 
-- Total training time: $3.03296 \times 10^3$ seconds
-- Total number of iterations: $2.7017 \times 10^4$
-- Error in estimating $\lambda_{1}$: $0.27$%
-- Error in estimating $\lambda_{2}$: $6.75$%
+- Total training time: $26.440 \times 10^3$ seconds
+- Total number of iterations: $231.424 \times 10^3$
+- Error in estimating $\lambda_{1}$: $0.007$%
+- Error in estimating $\lambda_{2}$: $1.864$%
 
 ### Noisy data
 
-- Total training time: $6.68903 \times 10^3$ seconds
-- Total number of iterations: $5.9526 \times 10^4$
-- Error in estimating $\lambda_{1}$: $0.34$%
-- Error in estimating $\lambda_{2}$: $7.67$%
+- Total training time: $26.236 \times 10^3$ seconds
+- Total number of iterations: $228.766 \times 10^3$
+- Error in estimating $\lambda_{1}$: $0.029$%
+- Error in estimating $\lambda_{2}$: $3.290$%
 
 ## Running Navier–Stokes equation Scripts
 

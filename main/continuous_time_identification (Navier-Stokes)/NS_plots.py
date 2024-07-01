@@ -115,7 +115,7 @@ def f(model, x_train_pt, y_train_pt, t_train_pt, lambda_1, lambda_2):
         tuple of torch.Tensor: A tuple containing the velocity components (u, v), pressure (p),
                                and the residuals of the PDE (f_u, f_v).
     """
-    psi_and_p = model(torch.stack((x_train_pt, y_train_pt, t_train_pt), axis=1).view(-1, 3))
+    psi_and_p = model(torch.stack((x_train_pt.float(), y_train_pt.float(), t_train_pt.float()), axis=1).view(-1, 3))
     psi = psi_and_p[:,0:1]
     p = psi_and_p[:,1:2]
     
@@ -234,14 +234,14 @@ u_train = u[idx,:]
 v_train = v[idx,:]
 
 # Convert to PyTorch tensors
-x_train_pt = torch.from_numpy(x_train)
+x_train_pt = torch.from_numpy(x_train).float()
 x_train_pt.requires_grad = True
-y_train_pt = torch.from_numpy(y_train)
+y_train_pt = torch.from_numpy(y_train).float()
 y_train_pt.requires_grad = True
-t_train_pt = torch.from_numpy(t_train)
+t_train_pt = torch.from_numpy(t_train).float()
 t_train_pt.requires_grad = True
-u_train_pt = torch.from_numpy(u_train)
-v_train_pt = torch.from_numpy(v_train)
+u_train_pt = torch.from_numpy(u_train).float()
+v_train_pt = torch.from_numpy(v_train).float()
 
 # Load model and test data
 model_path = f'NS_clean.pt'
@@ -263,18 +263,18 @@ u_star = U_star[:,0,snap]
 v_star = U_star[:,1,snap]
 p_star = P_star[:,snap]   
 
-x_star_pt = torch.from_numpy(x_star)
+x_star_pt = torch.from_numpy(x_star).float()
 x_star_pt.requires_grad = True
-y_star_pt = torch.from_numpy(y_star)
+y_star_pt = torch.from_numpy(y_star).float()
 y_star_pt.requires_grad = True
-t_star_pt = torch.from_numpy(t_star)
+t_star_pt = torch.from_numpy(t_star).float()
 t_star_pt.requires_grad = True    
 
 # Predict
-u_pred, v_pred, p_pred, f_u_pred, f_v_pred = f(model, x_star_pt, y_star_pt, t_star_pt,lambda_1_value,lambda_2_value) 
-u_pred = u_pred.detach().numpy()
-v_pred = v_pred.detach().numpy()
-p_pred = p_pred.detach().numpy()
+u_pred, v_pred, p_pred, f_u_pred, f_v_pred = f(model, x_star_pt.float(), y_star_pt.float(), t_star_pt.float(),lambda_1_value,lambda_2_value) 
+u_pred = u_pred.detach().numpy() 
+v_pred = v_pred.detach().numpy() 
+p_pred = p_pred.detach().numpy() 
   
 # Compute errors
 error_u = np.linalg.norm(u_star-u_pred,2)/np.linalg.norm(u_star,2)
@@ -387,7 +387,7 @@ savefig('figures/NS.pdf')
 
  
 # Define the limit
-limit = 81_001
+limit = 231_001
 step = 1000
 
 # Load and plot models
