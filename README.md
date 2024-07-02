@@ -4,22 +4,6 @@
 
 ---
 
-![Schrodinger](main/continuous_time_inference%20(Schrodinger)/figures/Schrodinger.gif)
-
----
-
-![Allen–Cahn](main/discrete_time_inference%20(AC)/figures/AC.gif)
-
----
-
-![Navier–Stokes](main/continuous_time_identification%20(Navier-Stokes)/figures/NS.gif)
-
----
-
- ![Korteweg–de Vries](main/discrete_time_identification%20(KdV)/figures/KdV.gif)
-
----
-
 This project is a replication of ''Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations'' by M. Raissi, P. Perdikaris, and G.E. Karniadakis from 2019.
 
 Full reference to the original article :
@@ -44,10 +28,22 @@ The replication of the original article will be submitted to Rescience C.
 `main/`:
 
 - `Data/`: Contains .mat files with the required inputs for the models.
+
 - `continuous_time_inference (Schrodinger)/`: Results in Figure 1, corresponding to the the 3.1.1. Example (Schrodinger equation).
+
+![Schrodinger](main/continuous_time_inference%20(Schrodinger)/figures/Schrodinger.gif)
+
 - `discrete_time_inference (AC)/`: Results in Figure 2, corresponding the the 3.2.1. Example (Allen–Cahn equation).
+
+![Allen–Cahn](main/discrete_time_inference%20(AC)/figures/AC.gif)
+
 - `continuous_time_identification (Navier-Stokes)/`: Results in Figure 4, corresponding the the 4.1.1. Example (Navier–Stokes equation).
+
+![Navier–Stokes](main/continuous_time_identification%20(Navier-Stokes)/figures/NS.gif)
+
 - `discrete_time_identification (KdV)/`: Results in Figure 5, corresponding the the 4.2.1. Example (Korteweg–de Vries equation).
+
+ ![Korteweg–de Vries](main/discrete_time_identification%20(KdV)/figures/KdV.gif)
 
 `appendix/`:
 
@@ -56,7 +52,6 @@ The replication of the original article will be submitted to Rescience C.
 - `discrete_time_inference (Burgers)/`: Results in Figure A.7, corresponding to the the A.7. Discrete time models.
 - `continuous_time_identification (Burgers)/`: Results in Figure B.8, corresponding to the the B.2. Discrete time models.
 - `discrete_time_identification (Burgers)/`: Results in Figure B.9, corresponding to the the B.3. Discrete time models.
-
 
 Each example contains the main and plotting codes, figures (`figures/`), model (`.pt`) and summary information about the training process (`training/`).  
 
@@ -95,6 +90,8 @@ This command will execute the following scripts sequentially:
 > - kdV_clean_main.py
 > - kdV_noisy_main.py
 > - kdV_plots.py   
+ 
+
 
 Or to run the scripts individually.
 
