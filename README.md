@@ -15,13 +15,11 @@ GitHub Repository of original work:
 > https://github.com/maziarraissi/PINNs
 
 
-The aim of this project was to:
+The aim of this repository was to:
 
 >- Reproduce the figures from the main manuscript of Raissi et al. (2019), originally obtained with Tensorflow 1x, using the Python library PyTorch. 
 > - Save the models obtained from the training.
 > - Record the training information such as computing times and the accuracies achieved.
-
-The replication of the original article will be submitted to Rescience C.
 
 ## Repository Organisation
 
