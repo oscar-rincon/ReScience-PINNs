@@ -499,3 +499,20 @@ pyrightconfig.json
 # Discrete Time Identification (KdV)
 /main/discrete_time_identification\ \(KdV\)/figures_iters/*.png
 /main/discrete_time_identification\ \(KdV\)/models_iters/*.pt
+
+
+# Continuous Time Inference (Burgers)
+/appendix/continuous_time_inference (Burgers)/figures_iters/*.png
+/appendix/continuous_time_inference (Burgers)/models_iters/*.pt
+
+# discrete_time_inference (Burgers)
+/appendix/discrete_time_inference (Burgers)/figures_iters/*.png
+/appendix/discrete_time_inference (Burgers)/models_iters/*.pt
+
+# continuous_time_identification (Burgers)
+/appendix/continuous_time_identification (Burgers)/figures_iters/*.png
+/appendix/continuous_time_identification (Burgers)/models_iters/*.pt
+
+# Continuous Time Inference (Burgers)
+/appendix/discrete_time_identification (Burgers)/figures_iters/*.png
+/appendix/discrete_time_identification (Burgers)/models_iters/*.pt
