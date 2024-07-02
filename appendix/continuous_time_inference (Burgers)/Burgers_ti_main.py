@@ -60,7 +60,7 @@ def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
         
         The function also saves the model state every 1000 iterations to a file named 'Burgers_{iter}.pt' in the 'models_iters' directory.
     """
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
     global iter
      
     for i in range(1, num_iter + 1):
@@ -72,9 +72,9 @@ def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
         error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
         results.append([iter, loss.item(), error])
         iter += 1
-        if iter % 1000 == 0:
-            torch.save(model.state_dict(), f'models_iters/Burgers_{iter}.pt')
-            print(f"Adam - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
+        if iter % 100 == 0:
+            torch.save(model.state_dict(), f'models_iters/Burgers_ti_{iter}.pt')
+            print(f"Adam - Iter: {iter:.6e} - Loss: {loss.item():.6e} - L2: {error:.6e}")
 
 def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     """
@@ -101,9 +101,9 @@ def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     u_pred = model(torch.cat((x_star, t_star), dim=1)) 
     error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
     results.append([iter, loss.item(), error]) 
-    if iter % 1000 == 0:
-        torch.save(model.state_dict(), f'models_iters/Burgers_{iter}.pt')
-        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
+    if iter % 100 == 0:
+        torch.save(model.state_dict(), f'models_iters/Burgers_ti_{iter}.pt')
+        print(f"LBFGS - Iter: {iter:.6e} - Loss: {loss.item():.6e} - L2: {error:.6e}")
     
     return loss
 
@@ -192,6 +192,7 @@ if __name__ == "__main__":
     u_train = u_train[idx, :]
 
     # Convert to tensors and set requires_grad for training
+    # Convert to tensors and set requires_grad for training with double precision
     x_u = torch.from_numpy(X_u_train[:, 0:1].astype(np.float32)).to(device)
     x_u.requires_grad = True
     x_f = torch.from_numpy(X_f_train[:, 0:1].astype(np.float32)).to(device)
@@ -201,7 +202,7 @@ if __name__ == "__main__":
     t_f = torch.from_numpy(X_f_train[:, 1:2].astype(np.float32)).to(device)
     t_f.requires_grad = True
     u_train_pt = torch.from_numpy(u_train).float().to(device)
-    nu = torch.tensor(nu).float().to(device)
+    nu = torch.tensor(nu).double().to(device)
     x_star = torch.from_numpy(X_star[:, 0:1]).float().to(device)
     x_star.requires_grad = True
     t_star = torch.from_numpy(X_star[:, 1:2]).float().to(device)
@@ -209,13 +210,13 @@ if __name__ == "__main__":
     u_star = torch.from_numpy(u_star).T.float().to(device)
 
     # Initialize the model and apply initial weights
-    model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).to(device)
+    model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).float().to(device)
     model.apply(init_weights)
 
     # Training phase
     # Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=10_000)
+    train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
@@ -238,15 +239,15 @@ if __name__ == "__main__":
     print(f"Final L2: {final_l2:.6e}")
 
     # Save training summary
-    with open('training/Schrodinger_training_summary.txt', 'w') as file:
+    with open('training/Burgers_ti_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
         file.write(f"Total training time: {total_training_time:.6e} seconds\n")
-        file.write(f"Total iterations: {iter}\n")
+        file.write(f"Total iterations: {iter:.6e}\n")
         file.write(f"Final Loss: {final_loss:.6e}\n")
         file.write(f"Final L2: {final_l2:.6e}\n")
 
     # Save training data and model state
     results = np.array(results)
-    np.savetxt("training/Burgers_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
-    torch.save(model.state_dict(), 'Burgers.pt')
+    np.savetxt("training/Burgers_ti_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
+    torch.save(model.state_dict(), 'Burgers_ti.pt')

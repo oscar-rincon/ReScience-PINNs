@@ -136,17 +136,17 @@ def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
 
 def main_loop(N_u, N_f, num_layers, num_neurons): 
     # Set a fixed seed for reproducibility
-    set_seed(42)
+    #set_seed(42)
 
     # Check GPU availability and select device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'Using device: {device}')
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #print(f'Using device: {device}')
 
     # Create directories for storing models and training data if they don't exist
-    if not os.path.exists('models_iters'):
-        os.makedirs('models_iters')
-    if not os.path.exists('training'):
-        os.makedirs('training')
+    #if not os.path.exists('models_iters'):
+    #    os.makedirs('models_iters')
+    #if not os.path.exists('training'):
+    #    os.makedirs('training')
 
     # Initialize variables
     

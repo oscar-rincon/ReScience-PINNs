@@ -44,7 +44,7 @@ if not os.path.exists('figures_iters'):
 
 
 # Load training data from CSV file
-data = pd.read_csv('training/Burgers_training_data.csv')
+data = pd.read_csv('training/Burgers_ti_training_data.csv')
 
 # Create a figure with 2 subplots arranged horizontally
 fig, axarr = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))
@@ -65,7 +65,7 @@ axarr[1].set_ylabel(r'$\mathrm{L}_2$')  # Y-axis label using LaTeX for L2
 plt.tight_layout()
 
 # Save the figure to a PDF in the specified directory
-plt.savefig('figures/Burgers_training_curves.pdf')   
+plt.savefig('figures/Burgers_ti_training_curves.pdf')   
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device: {device}')
@@ -204,7 +204,7 @@ ax.set_xlim([-1.1,1.1])
 ax.set_ylim([-1.1,1.1])    
 ax.set_title('$t = 0.75$', fontsize = 10)
 
-image_path = f'figures/Burgers.pdf'
+image_path = f'figures/Burgers_ti.pdf'
 plt.savefig(image_path)
 
 
@@ -213,13 +213,13 @@ plt.savefig(image_path)
  
 model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
-gif_filename = 'figures/Burgers.gif'
-limit = 13000
-step = 1000
+gif_filename = 'figures/Burgers_ti.gif'
+limit = 4600
+step = 100
 
 for i in range(step, limit, step):
     model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).to(device)
-    model_path = os.path.join(model_dir, f'Burgers_{i}.pt')
+    model_path = os.path.join(model_dir, f'Burgers_ti_{i}.pt')
     model.load_state_dict(torch.load(model_path))
     model.eval()
 
@@ -298,7 +298,7 @@ for i in range(step, limit, step):
 
 
     # Save the figure
-    image_path = os.path.join(image_dir, f'Burgers_{i}.png')
+    image_path = os.path.join(image_dir, f'Burgers_ti_{i}.png')
     plt.savefig(image_path)
     plt.close()
 
@@ -306,8 +306,8 @@ for i in range(step, limit, step):
 images = []
 
 for i in range(step, limit, step):
-    image_path = os.path.join(image_dir, f'Burgers_{i}.png')
+    image_path = os.path.join(image_dir, f'Burgers_ti_{i}.png')
     images.append(imageio.imread(image_path))
 
-imageio.mimsave(gif_filename, images, fps=2)    
+imageio.mimsave(gif_filename, images, fps=3)    
     
