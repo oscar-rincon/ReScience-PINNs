@@ -68,11 +68,13 @@ def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
         loss = mse_f(model, x_f, t_f, nu) + mse_u(model, x_u, t_u, u_train_pt)
         loss.backward(retain_graph=True)
         optimizer.step()
-        #u_pred = model(torch.cat((x_star, t_star), dim=1))
-        #error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
+        u_pred = model(torch.cat((x_star, t_star), dim=1))
+        error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
+        results.append([iter, loss.item(), error])
         iter += 1
-        if iter % 1000 == 0:
-            print(f"Adam - Iter: {iter} - Loss: {loss.item()}")
+        if iter % 100 == 0:
+            torch.save(model.state_dict(), f'models_iters/Burgers_cti_{iter}.pt')
+            print(f"Adam - Iter: {iter:.6e} - Loss: {loss.item():.6e} - L2: {error:.6e}")
 
 def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     """
@@ -96,12 +98,12 @@ def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     loss.backward(retain_graph=True)
     global iter
     iter += 1    
-    #u_pred = model(torch.cat((x_star, t_star), dim=1)) 
-    #error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
-    #results.append([iter, loss.item(), error]) 
-    if iter % 1000 == 0:
-        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()}")
-    
+    u_pred = model(torch.cat((x_star, t_star), dim=1)) 
+    error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
+    results.append([iter, loss.item(), error]) 
+    if iter % 100 == 0:
+        torch.save(model.state_dict(), f'models_iters/Burgers_cti_{iter}.pt')
+        print(f"LBFGS - Iter: {iter:.6e} - Loss: {loss.item():.6e} - L2: {error:.6e}")   
     return loss
 
 def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
@@ -128,116 +130,18 @@ def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
                                   max_iter=num_iter,
                                   max_eval=num_iter,
                                   tolerance_grad=1e-7,
-                                  history_size=100,
                                   tolerance_change=1.0 * np.finfo(float).eps,
-                                  line_search_fn="strong_wolfe")
+                                  history_size=100,
+                                  line_search_fn='strong_wolfe')    
     closure_fn = partial(closure, model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt)
     optimizer.step(closure_fn)
 
-def main_loop(N_u, N_f, num_layers, num_neurons): 
+if __name__ == "__main__":
     # Set a fixed seed for reproducibility
-    #set_seed(42)
-
-    # Check GPU availability and select device
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    #print(f'Using device: {device}')
-
-    # Create directories for storing models and training data if they don't exist
-    #if not os.path.exists('models_iters'):
-    #    os.makedirs('models_iters')
-    #if not os.path.exists('training'):
-    #    os.makedirs('training')
-
-    # Initialize variables
-    
-    iter = 0  # Initialize iteration counter
-    nu = 0.01 / np.pi  # Viscosity
-    noise = 0.0  # Noise level (unused)
-    #N_u = 100  # Number of training points for u
-    #N_f = 10_000  # Number of training points for f
-
-    # Load data
-    data = scipy.io.loadmat('../Data/burgers_shock.mat')
-    t = data['t'].flatten()[:, None]
-    x = data['x'].flatten()[:, None]
-    Exact = np.real(data['usol']).T
-
-    # Prepare training data
-    X, T = np.meshgrid(x, t)
-    X_star = np.hstack((X.flatten()[:, None], T.flatten()[:, None]))
-    u_star = Exact.flatten()[:, None].T
-
-    # Domain bounds
-    lb = X_star.min(0)
-    ub = X_star.max(0)
-
-    # Boundary and initial conditions
-    xx1 = np.hstack((X[0:1, :].T, T[0:1, :].T))
-    uu1 = Exact[0:1, :].T
-    xx2 = np.hstack((X[:, 0:1], T[:, 0:1]))
-    uu2 = Exact[:, 0:1]
-    xx3 = np.hstack((X[:, -1:], T[:, -1:]))
-    uu3 = Exact[:, -1:]
-
-    # Combine and select training points
-    X_u_train = np.vstack([xx1, xx2, xx3])
-    X_f_train = lb + (ub - lb) * lhs(2, N_f)
-    X_f_train = np.vstack((X_f_train, X_u_train))
-    u_train = np.vstack([uu1, uu2, uu3])
-    idx = np.random.choice(X_u_train.shape[0], N_u, replace=False)
-    X_u_train = X_u_train[idx, :]
-    u_train = u_train[idx, :]
-
-    # Convert to tensors and set requires_grad for training
-    x_u = torch.from_numpy(X_u_train[:, 0:1].astype(np.float32)).to(device)
-    x_u.requires_grad = True
-    x_f = torch.from_numpy(X_f_train[:, 0:1].astype(np.float32)).to(device)
-    x_f.requires_grad = True
-    t_u = torch.from_numpy(X_u_train[:, 1:2].astype(np.float32)).to(device)
-    t_u.requires_grad = True
-    t_f = torch.from_numpy(X_f_train[:, 1:2].astype(np.float32)).to(device)
-    t_f.requires_grad = True
-    u_train_pt = torch.from_numpy(u_train).float().to(device)
-    nu = torch.tensor(nu).float().to(device)
-    x_star = torch.from_numpy(X_star[:, 0:1]).float().to(device)
-    x_star.requires_grad = True
-    t_star = torch.from_numpy(X_star[:, 1:2]).float().to(device)
-    t_star.requires_grad = True
-    u_star = torch.from_numpy(u_star).T.float().to(device)
-
-    # Initialize the model and apply initial weights
-    model = MLP(input_size=2, output_size=1, hidden_layers=num_layers, hidden_units=num_neurons, activation_function=nn.Tanh()).to(device)
-    model.apply(init_weights)
-
-    # Training phase
-    # Adam optimizer
-    start_time_adam = time.time()
-    train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=1)
-    end_time_adam = time.time()
-    adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
-
-    # L-BFGS optimizer
-    start_time_lbfgs = time.time()
-    train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=1)
-    end_time_lbfgs = time.time()
-    lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
-
-    # Total training time
-    total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
-
-    u_pred = model(torch.cat((x_star, t_star), dim=1))
-    error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
-    print(f"L2: {error}")
-    return error
-
-if __name__ == "__main__": 
     set_seed(42)
 
     # Check GPU availability and select device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda')#torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
 
     # Create directories for storing models and training data if they don't exist
@@ -245,10 +149,9 @@ if __name__ == "__main__":
         os.makedirs('models_iters')
     if not os.path.exists('training'):
         os.makedirs('training')
-    if not os.path.exists('tables'):
-        os.makedirs('tables')
+
     # Initialize variables
-    
+    results = []
     iter = 0  # Initialize iteration counter
     nu = 0.01 / np.pi  # Viscosity
     noise = 0.0  # Noise level (unused)
@@ -287,14 +190,14 @@ if __name__ == "__main__":
     X_u_train = X_u_train[idx, :]
     u_train = u_train[idx, :]
 
-    # Convert to tensors and set requires_grad for training
-    x_u = torch.from_numpy(X_u_train[:, 0:1].astype(np.float32)).to(device)
+    # Convert to tensors and set requires_grad for training with float precision
+    x_u = torch.from_numpy(X_u_train[:, 0:1]).float().to(device)
     x_u.requires_grad = True
-    x_f = torch.from_numpy(X_f_train[:, 0:1].astype(np.float32)).to(device)
+    x_f = torch.from_numpy(X_f_train[:, 0:1]).float().to(device)
     x_f.requires_grad = True
-    t_u = torch.from_numpy(X_u_train[:, 1:2].astype(np.float32)).to(device)
+    t_u = torch.from_numpy(X_u_train[:, 1:2]).float().to(device)
     t_u.requires_grad = True
-    t_f = torch.from_numpy(X_f_train[:, 1:2].astype(np.float32)).to(device)
+    t_f = torch.from_numpy(X_f_train[:, 1:2]).float().to(device)
     t_f.requires_grad = True
     u_train_pt = torch.from_numpy(u_train).float().to(device)
     nu = torch.tensor(nu).float().to(device)
@@ -304,22 +207,46 @@ if __name__ == "__main__":
     t_star.requires_grad = True
     u_star = torch.from_numpy(u_star).T.float().to(device)
 
-    N_u = [20, 40, 60, 80, 100, 200]
-    N_f = [2000, 4000, 6000, 7000, 8000, 10000]
-    
-    num_layers = [2,4,6,8]
-    num_neurons = [10,20,40]    
-    
-    error_table_1 = np.zeros((len(N_u), len(N_f)))
-    error_table_2 = np.zeros((len(num_layers), len(num_neurons)))
- 
-    for i in range(len(N_u)):
-        for j in range(len(N_f)):
-            error_table_1[i,j] = main_loop(N_u[i], N_f[j], num_layers[-1], num_neurons[-1])
-            
-    for i in range(len(num_layers)):
-        for j in range(len(num_neurons)):
-            error_table_2[i,j] = main_loop(N_u[-1], N_f[-1], num_layers[i], num_neurons[j])
-            
-    np.savetxt('./tables/error_table_1.csv', error_table_1, delimiter=' & ', fmt='$%.2e$', newline=' \\\\\n')
-    np.savetxt('./tables/error_table_2.csv', error_table_2, delimiter=' & ', fmt='$%.2e$', newline=' \\\\\n')
+    # Initialize the model and apply initial weights
+    model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).float().to(device)
+    model.apply(init_weights)
+
+    # Training phase
+
+    # Adam optimizer
+    start_time_adam = time.time()
+    train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=0)
+    end_time_adam = time.time()
+    adam_training_time = end_time_adam - start_time_adam
+    print(f"Adam training time: {adam_training_time:.2f} seconds")
+
+    # L-BFGS optimizer
+    start_time_lbfgs = time.time()
+    train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000)
+    end_time_lbfgs = time.time()
+    lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
+    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+
+    # Total training time
+    total_training_time = adam_training_time + lbfgs_training_time
+    print(f"Total training time: {total_training_time:.2f} seconds")
+
+    # Final loss and L2 error
+    final_loss = results[-1][1]
+    print(f"Final Loss: {final_loss:.6e}")
+    final_l2 = results[-1][2]
+    print(f"Final L2: {final_l2:.6e}")
+
+    # Save training summary
+    with open('training/Burgers_cti_training_summary.txt', 'w') as file:
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
+        file.write(f"Total iterations: {iter:.6e}\n")
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Final L2: {final_l2:.6e}\n")
+
+    # Save training data and model state
+    results = np.array(results)
+    np.savetxt("training/Burgers_cti_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
+    torch.save(model.state_dict(), 'Burgers_cti.pt')

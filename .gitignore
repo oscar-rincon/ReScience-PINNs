@@ -506,12 +506,12 @@ pyrightconfig.json
 /appendix/continuous_time_inference (Burgers)/models_iters/*.pt
 /appendix/continuous_time_inference (Burgers)/tables/*.csv
 
-# discrete_time_inference (Burgers)
+# discrete Time inference (Burgers)
 /appendix/discrete_time_inference (Burgers)/figures_iters/*.png
 /appendix/discrete_time_inference (Burgers)/models_iters/*.pt
 /appendix/discrete_time_inference (Burgers)/tables/*.csv
 
-# continuous_time_identification (Burgers)
+# continuous Time identification (Burgers)
 /appendix/continuous_time_identification (Burgers)/figures_iters/*.png
 /appendix/continuous_time_identification (Burgers)/models_iters/*.pt
 /appendix/continuous_time_identification (Burgers)/tables/*.csv
