@@ -190,7 +190,7 @@ savefig('./figures/Burgers')
 model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
 gif_filename = 'figures/Burgers_dti.gif'
-limit = 20_500
+limit = 2_000
 step = 1_00
 
 for i in range(step, limit, step):
