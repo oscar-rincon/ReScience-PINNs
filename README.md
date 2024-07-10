@@ -81,30 +81,6 @@ conda list -n ReScience-PINNs-env
    make all
    ```
 
-> - Schrodinger_main.py
-> - Schrodinger_plots.py
-> - AC_main.py
-> - AC_plots.py
-> - NS_clean_main.py
-> - NS_noisy_main.py
-> - NS_plots.py
-> - kdV_clean_main.py
-> - kdV_noisy_main.py
-> - kdV_plots.py  
-> - Burgers_ctin_main.py 
-> - Burgers_ctin_plots.py 
-> - Burgers_ctin_main_systematic.py  
-> - Burgers_dtin_main.py  
-> - Burgers_dtin_plots.py  
-> - Burgers_dtin_main_systematic.py 
-> - Burgers_ctid_main.py 
-> - Burgers_ctid_plots.py
-> - Burgers_ctid_main_systematic.py  
-> - Burgers_dtid_main.py   
-> - Burgers_dtid_plots.py  
-> - Burgers_dtid_main_systematic.py  
-    
-
 ### Main scripts
 
 **Run the scripts individually:**
@@ -220,4 +196,30 @@ make run_Burgers_dtid_main_systematic
 ## Hardware configuration
 
 The models were trained with a NVIDIA GeForce RTX A2000 GPU card. The summary of the training information such as the computing times is included in the the folder of each simulation.
+
+## List of scripts
+
+> - Schrodinger_main.py
+> - Schrodinger_plots.py
+> - AC_main.py
+> - AC_plots.py
+> - NS_clean_main.py
+> - NS_noisy_main.py
+> - NS_plots.py
+> - kdV_clean_main.py
+> - kdV_noisy_main.py
+> - kdV_plots.py  
+> - Burgers_ctin_main.py 
+> - Burgers_ctin_plots.py 
+> - Burgers_ctin_main_systematic.py  
+> - Burgers_dtin_main.py  
+> - Burgers_dtin_plots.py  
+> - Burgers_dtin_main_systematic.py 
+> - Burgers_ctid_main.py 
+> - Burgers_ctid_plots.py
+> - Burgers_ctid_main_systematic.py  
+> - Burgers_dtid_main.py   
+> - Burgers_dtid_plots.py  
+> - Burgers_dtid_main_systematic.py  
+    
 

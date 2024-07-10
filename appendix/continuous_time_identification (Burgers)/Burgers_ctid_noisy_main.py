@@ -23,7 +23,7 @@ from pinns import *  # Physics Informed Neural Networks utilities
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
 
-def f(model, x, t, nu):
+def f(model, x, t, nu, lambda_1, lambda_2):
     lambda_2 = torch.exp(lambda_2)
     u = model(torch.cat((x, t), dim=1))
     u_t = derivative(u, t, order=1)
@@ -32,15 +32,15 @@ def f(model, x, t, nu):
     f = u_t + lambda_1 * u * u_x - lambda_2 * u_xx
     return f
 
-def mse_f(model, x, t, nu):
-    f_pred = f(model, x, t, nu)
+def mse_f(model, x, t, nu, lambda_1, lambda_2):
+    f_pred = f(model, x, t, nu,lambda_1, lambda_2)
     return (f_pred**2).mean()
 
 def mse_u(model, x, t, u_train_pt):
     u = model(torch.cat((x, t), dim=1))
     return ((u_train_pt - u) ** 2).mean()
 
-def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
+def train_adam(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50_000):
     """
     Trains a neural network model using the Adam optimizer over a specified number of iterations to solve a PDE problem.
 
@@ -67,19 +67,19 @@ def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
     for i in range(1, num_iter + 1):
         iter += 1 
         optimizer.zero_grad()
-        loss = mse_f(model, x_f, t_f, nu) + mse_u(model, x_u, t_u, u_train_pt)
+        loss = mse_f(model, x_u, t_u, nu, lambda_1, lambda_2) + mse_u(model, x_u, t_u, u_train_pt)
         loss.backward(retain_graph=True)
         optimizer.step()
         lambda_1s.append(lambda_1.item())
         lambda_2s.append(torch.exp(lambda_2).item())
         error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0) / 1.0 * 100
-        error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - nu) / nu * 100
+        error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
         if i % 100 == 0:
             torch.save(model.state_dict(), f'models_iters/Burgers_ctid_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
 
-def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
+def closure(model, optimizer, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2):
     """
     Performs a single optimization step using the provided model and optimizer, and calculates the loss.
  
@@ -97,21 +97,21 @@ def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
         torch.Tensor: The calculated loss for the current optimization step.
     """
     optimizer.zero_grad()
-    loss = mse_f(model, x_f, t_f, nu) + mse_u(model, x_u, t_u, u_train_pt)
+    loss = mse_f(model,x_u, t_u, nu, lambda_1, lambda_2) + mse_u(model, x_u, t_u, u_train_pt)
     loss.backward(retain_graph=True)
     global iter
     iter += 1    
     lambda_1s.append(lambda_1.item())
     lambda_2s.append(torch.exp(lambda_2).item())
-    error_lambda_1 = np.abs(lambda_1.detach().numpy() - 1.0) / 1.0 * 100
-    error_lambda_2 = np.abs(torch.exp(lambda_2).detach().numpy() -nu) / nu * 100
+    error_lambda_1 = np.abs(lambda_1.cpu().detach().numpy() - 1.0) / 1.0 * 100
+    error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() -nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
     results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
-    if iter % 1000 == 0:
-        torch.save(model.state_dict(), f'models_iters/KdV_clean_{iter}.pt')
-        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.detach().numpy().item()} - l2: {torch.exp(lambda_2).detach().numpy().item()}")
+    if iter % 100 == 0:
+        torch.save(model.state_dict(), f'models_iters/Burgers_ctin_{iter}.pt')
+        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
     return loss 
 
-def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
+def train_lbfgs(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50_000):
     """
     Trains a neural network model using the LBFGS optimizer to solve a PDE problem.
  
@@ -138,7 +138,7 @@ def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
                                   tolerance_change=1.0 * np.finfo(float).eps,
                                   history_size=100,
                                   line_search_fn='strong_wolfe')    
-    closure_fn = partial(closure, model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt)
+    closure_fn = partial(closure, model, optimizer, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2)
     optimizer.step(closure_fn)
 
 if __name__ == "__main__":
@@ -157,52 +157,41 @@ if __name__ == "__main__":
 
     # Initialize variables
     iter = 0  # Initialize iteration counter
-    nu = 0.01 / np.pi  # Viscosity
-    noise = 0.0  # Noise level (unused)
-    N_u = 100  # Number of training points for u
-    N_f = 10_000  # Number of training points for f
+    nu = 0.01/np.pi
 
-    # Load data
+    N_u = 2000
+     
     data = scipy.io.loadmat('../Data/burgers_shock.mat')
-    t = data['t'].flatten()[:, None]
-    x = data['x'].flatten()[:, None]
+    
+    t = data['t'].flatten()[:,None]
+    x = data['x'].flatten()[:,None]
     Exact = np.real(data['usol']).T
+    
+    X, T = np.meshgrid(x,t)
+    
+    X_star = np.hstack((X.flatten()[:,None], T.flatten()[:,None]))
+    u_star = Exact.flatten()[:,None]              
 
-    # Prepare training data
-    X, T = np.meshgrid(x, t)
-    X_star = np.hstack((X.flatten()[:, None], T.flatten()[:, None]))
-    u_star = Exact.flatten()[:, None].T
-
-    # Domain bounds
+    # Doman bounds
     lb = X_star.min(0)
-    ub = X_star.max(0)
-
-    # Boundary and initial conditions
-    xx1 = np.hstack((X[0:1, :].T, T[0:1, :].T))
-    uu1 = Exact[0:1, :].T
-    xx2 = np.hstack((X[:, 0:1], T[:, 0:1]))
-    uu2 = Exact[:, 0:1]
-    xx3 = np.hstack((X[:, -1:], T[:, -1:]))
-    uu3 = Exact[:, -1:]
-
-    # Combine and select training points
-    X_u_train = np.vstack([xx1, xx2, xx3])
-    X_f_train = lb + (ub - lb) * lhs(2, N_f)
-    X_f_train = np.vstack((X_f_train, X_u_train))
-    u_train = np.vstack([uu1, uu2, uu3])
-    idx = np.random.choice(X_u_train.shape[0], N_u, replace=False)
-    X_u_train = X_u_train[idx, :]
-    u_train = u_train[idx, :]
+    ub = X_star.max(0)    
+ 
+    noise = 0.01            
+             
+    idx = np.random.choice(X_star.shape[0], N_u, replace=False)
+    X_u_train = X_star[idx,:]
+    u_train = u_star[idx,:]
+    u_train = u_train + noise*np.std(u_train)*np.random.randn(u_train.shape[0], u_train.shape[1])   
 
     # Convert to tensors and set requires_grad for training with float precision
     x_u = torch.from_numpy(X_u_train[:, 0:1]).float().to(device)
     x_u.requires_grad = True
-    x_f = torch.from_numpy(X_f_train[:, 0:1]).float().to(device)
-    x_f.requires_grad = True
+    #x_f = torch.from_numpy(X_f_train[:, 0:1]).float().to(device)
+    #x_f.requires_grad = True
     t_u = torch.from_numpy(X_u_train[:, 1:2]).float().to(device)
     t_u.requires_grad = True
-    t_f = torch.from_numpy(X_f_train[:, 1:2]).float().to(device)
-    t_f.requires_grad = True
+    #t_f = torch.from_numpy(X_f_train[:, 1:2]).float().to(device)
+    #t_f.requires_grad = True
     u_train_pt = torch.from_numpy(u_train).float().to(device)
     nu = torch.tensor(nu).float().to(device)
     x_star = torch.from_numpy(X_star[:, 0:1]).float().to(device)
@@ -227,14 +216,14 @@ if __name__ == "__main__":
 
     # Adam optimizer
     start_time_adam = time.time()
-    train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=0)
+    train_adam(model, x_u, t_u, nu, u_train_pt,lambda_1, lambda_2, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
     print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=1)
+    train_lbfgs(model, x_u, t_u, nu, u_train_pt,lambda_1, lambda_2, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
@@ -250,7 +239,7 @@ if __name__ == "__main__":
     print(f"Final L2: {final_l2:.6e}")
 
     # Save training summary
-    with open('training/Burgers_ctin_training_summary.txt', 'w') as file:
+    with open('training/Burgers_ctin_noisy_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
         file.write(f"Total training time: {total_training_time:.6e} seconds\n")
@@ -260,17 +249,17 @@ if __name__ == "__main__":
 
     # Save training data and model state
     results = np.array(results)
-    np.savetxt("training/Burgers_ctin_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
+    np.savetxt("training/Burgers_ctin_noisy_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
     torch.save(model.state_dict(), 'Burgers_ctin.pt')
 
     # Calculate percentage error for lambda_1 and lambda_2
     error_lambda_1 = np.abs(lambda_1s[-1] - 1.0) / 1.0 * 100
-    error_lambda_2 = np.abs(lambda_2s[-1] - nu) / nu * 100
+    error_lambda_2 = np.abs(lambda_2s[-1] - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
     print(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%")
     print(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%")
 
     # Save training summary to a text file
-    with open('training/Burgers_ctin_training_summary.txt', 'w') as file:
+    with open('training/Burgers_ctin_noisy_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
@@ -283,10 +272,11 @@ if __name__ == "__main__":
     results = np.array(results)
     # Calculate percentage errors for lambda_1 and lambda_2
     error_lambda_1s = np.abs(np.array(lambda_1s) - 1.0) / 1.0 * 100
-    error_lambda_2s = np.abs(np.array(lambda_2s) - nu) / nu * 100
+    error_lambda_2s = np.abs(np.array(lambda_2s) - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
     # Save results and errors to CSV files
-    np.savetxt("training/Burgers_ctin_training_data.csv", np.column_stack([results[:,0], results[:,1], error_lambda_1s, error_lambda_2s]), delimiter=",", header="Iter,Loss,ErrorLambda1,ErrorLambda2", comments="")
-    np.savetxt("training/lambda_1s.csv", lambda_1s, delimiter=",", header="Lambda1", comments="")    
-    np.savetxt("training/lambda_2s.csv", lambda_2s, delimiter=",", header="Lambda2", comments="")
+    np.savetxt("training/Burgers_ctin_noisy_training_data.csv", np.column_stack([results[:,0], results[:,1], error_lambda_1s, error_lambda_2s]), delimiter=",", header="Iter,Loss,ErrorLambda1,ErrorLambda2", comments="")
+    np.savetxt("training/lambda_1s_noisy.csv", lambda_1s, delimiter=",", header="Lambda1", comments="")    
+    np.savetxt("training/lambda_2s_noisy.csv", lambda_2s, delimiter=",", header="Lambda2", comments="")
     # Save model state
-    torch.save(model.state_dict(), 'Burgers_ctin.pt')     
+    torch.save(model.state_dict(), 'Burgers_noisy_ctin.pt')         
+
