@@ -3,7 +3,7 @@
 .PHONY: all clean run_Schrodinger_main run_Schrodinger_plots run_AC_main run_AC_plots run_NS_clean_main run_NS_noisy_main run_NS_plots run_kdV_clean_main run_kdV_noisy_main run_kdV_plots
 
 # Define default target
-all: run_Schrodinger_main run_Schrodinger_plots run_AC_main run_AC_plots run_NS_clean_main run_NS_plots run_kdV_clean_main run_kdV_plots
+all: run_Schrodinger_main run_Schrodinger_plots run_AC_main run_AC_plots run_NS_clean_main run_NS_plots run_kdV_clean_main run_kdV_plots run_Burgers_ctin_main Burgers_ctin_plots Burgers_ctin_main_systematic run_Burgers_dtin_main run_Burgers_dtin_plots run_Burgers_dtin_main_systematic run_Burgers_ctid_main run_Burgers_ctid_plots run_Burgers_ctid_main_systematic run_Burgers_dtid_main run_Burgers_dtid_plots run_Burgers_dtid_main_systematic
 
 # Target to run Schrodinger_main.py
 run_Schrodinger_main:
@@ -64,6 +64,81 @@ run_kdV_plots:
 	@echo "Running kdV_plots.py..."
 	@python main/discrete_time_identification\ \(KdV\)/KdV_plots.py
 	@echo "Finished KdV_plots.py..."
+
+# Appendix
+
+# Target to run Burgers_ctin_main.py
+run_Burgers_ctin_main:
+	@echo "Running Burgers_ctin_main.py..."
+	@python appendix/continuous_time_inference\ \(Burgers\)/Burgers_ctin_main.py
+	@echo "Finished Burgers_ctin_main.py..."
+
+# Target to run Burgers_ctin_plots.py  
+run_Burgers_ctin_plots:
+	@echo "Running Burgers_ctin_plots.py..."
+	@python appendix/continuous_time_inference\ \(Burgers\)/Burgers_ctin_plots.py
+	@echo "Finished Burgers_ctin_plots.py..."
+
+# Target to run Burgers_ctin_main_systematic.py
+run_Burgers_ctin_main_systematic:
+	@echo "Running Burgers_ctin_main_systematic.py..."
+	@python appendix/continuous_time_inference\ \(Burgers\)/Burgers_ctin_main_systematic.py
+	@echo "Finished Burgers_ctin_main_systematic.py..."
+
+# Target to run Burgers_dtin_main.py
+run_Burgers_dtin_main:
+	@echo "Running Burgers_dtin_main.py..."
+	@python appendix/discrete_time_inference\ \(Burgers\)/Burgers_dtin_main.py
+	@echo "Finished Burgers_dtin_main.py..."
+
+# Target to run Burgers_dtin_plots.py  
+run_Burgers_dtin_plots:
+	@echo "Running Burgers_dtin_plots.py..."
+	@python appendix/discrete_time_inference\ \(Burgers\)/Burgers_dtin_plots.py
+	@echo "Finished Burgers_dtin_plots.py..."
+
+# Target to run Burgers_dtin_main_systematic.py
+Burgers_dtin_main_systematic:
+	@echo "Running Burgers_dtin_main_systematic.py..."
+	@python appendix/discrete_time_inference\ \(Burgers\)/Burgers_dtin_main_systematic.py
+	@echo "Finished Burgers_dtin_main_systematic.py..."	
+
+
+# Target to run Burgers_ctid_main.py
+run_Burgers_ctid_main:
+	@echo "Running Burgers_ctid_main.py..."
+	@python appendix/continuous_time_identification\ \(Burgers\)/Burgers_ctid_main.py
+	@echo "Finished Burgers_ctid_main.py..."
+
+# Target to run Burgers_ctid_plots.py  
+run_Burgers_ctid_plots:
+	@echo "Running Burgers_ctid_plots.py..."
+	@python appendix/continuous_time_identification\ \(Burgers\)/Burgers_ctid_plots.py
+	@echo "Finished Burgers_ctid_plots.py..."
+
+# Target to run Burgers_ctid_main_systematic.py
+run_Burgers_ctid_main_systematic:
+	@echo "Running Burgers_ctid_main_systematic.py..."
+	@python appendix/continuous_time_identification\ \(Burgers\)/Burgers_ctid_main_systematic.py
+	@echo "Finished Burgers_ctid_main_systematic.py..."
+
+# Target to run Burgers_dtid_main.py
+run_Burgers_dtid_main:
+	@echo "Running Burgers_dtid_main.py..."
+	@python appendix/discrete_time_identification\ \(Burgers\)/Burgers_dtid_main.py
+	@echo "Finished Burgers_dtid_main.py..."
+
+# Target to run Burgers_dtid_plots.py  
+run_Burgers_dtid_plots:
+	@echo "Running Burgers_dtid_plots.py..."
+	@python appendix/discrete_time_identification\ \(Burgers\)/Burgers_dtid_plots.py
+	@echo "Finished Burgers_dtid_plots.py..."
+
+# Target to run Burgers_dtid_main_systematic.py
+run_Burgers_dtid_main_systematic:
+	@echo "Running Burgers_dtid_main_systematic.py..."
+	@python appendix/discrete_time_identification\ \(Burgers\)/Burgers_dtid_main_systematic.py
+	@echo "Finished Burgers_dtid_main_systematic.py..."	
 
 # Clean up generated files
 clean:

@@ -46,9 +46,13 @@ The aim of this repository was to:
 `appendix/`:
 
 - `Data/`: Contains .mat files with the required inputs for the models.
+
 - `continuous_time_inference (Burgers)/`: Results in Figure A.6, corresponding to the the A.1. Continuous time models.
+
 - `discrete_time_inference (Burgers)/`: Results in Figure A.7, corresponding to the the A.7. Discrete time models.
+
 - `continuous_time_identification (Burgers)/`: Results in Figure B.8, corresponding to the the B.2. Discrete time models.
+
 - `discrete_time_identification (Burgers)/`: Results in Figure B.9, corresponding to the the B.3. Discrete time models.
 
 Each example contains the main and plotting codes, figures (`figures/`), model (`.pt`) and summary information about the training process (`training/`).  
@@ -72,11 +76,10 @@ conda list -n ReScience-PINNs-env
 
 **Run all scripts in sequence:**
 
+ 
    ```bash
    make all
    ```
-
-This command will execute the following scripts sequentially:
 
 > - Schrodinger_main.py
 > - Schrodinger_plots.py
@@ -87,14 +90,27 @@ This command will execute the following scripts sequentially:
 > - NS_plots.py
 > - kdV_clean_main.py
 > - kdV_noisy_main.py
-> - kdV_plots.py   
- 
-
-Or to run the scripts individually.
+> - kdV_plots.py  
+> - Burgers_ctin_main.py 
+> - Burgers_ctin_plots.py 
+> - Burgers_ctin_main_systematic.py  
+> - Burgers_dtin_main.py  
+> - Burgers_dtin_plots.py  
+> - Burgers_dtin_main_systematic.py 
+> - Burgers_ctid_main.py 
+> - Burgers_ctid_plots.py
+> - Burgers_ctid_main_systematic.py  
+> - Burgers_dtid_main.py   
+> - Burgers_dtid_plots.py  
+> - Burgers_dtid_main_systematic.py  
+    
 
 ### Main scripts
 
-**Schrodinger Equation - Continuous time inference:**
+**Run the scripts individually:**
+
+
+**Schrodinger Equation - Continuous time inference**
 
 ```bash
 make run_Schrodinger_main
@@ -104,7 +120,7 @@ make run_Schrodinger_main
 make run_Schrodinger_plots
 ```
 
-**AC Equation - Discrete time inference:**
+**AC Equation - Discrete time inference**
 
 ```bash
 make run_AC_main
@@ -114,7 +130,7 @@ make run_AC_main
 make run_AC_plots
 ```
 
-**NS equation - clean and noisy data - Continuous time identification:**
+**NS equation - clean and noisy data - Continuous time identification**
 
 ```bash
 make run_NS_clean_main
@@ -128,7 +144,7 @@ make run_NS_noisy_main
 make run_NS_plots
 ```
 
-**kdV equation - clean and noisy data - Discrete time identification:**
+**kdV equation - clean and noisy data - Discrete time identification**
 
 ```bash
 make run_kdV_clean_main
@@ -144,6 +160,62 @@ make run_kdV_plots
 ```
  
 ### Appendix scripts
+
+**Burgers equation -  Continuous time inference**
+
+```bash
+make run_Burgers_ctin_main
+```
+
+```bash
+make run_Burgers_ctin_plots
+```
+
+```bash
+make run_Burgers_ctin_main_systematic
+```
+
+**Burgers equation -  Discrete time inference**
+
+```bash
+make run_Burgers_dtin_main
+```
+
+```bash
+make run_Burgers_dtin_plots
+```
+
+```bash
+make run_Burgers_dtin_main_systematic
+```
+
+**Burgers equation -  Continuous time identification**
+
+```bash
+make run_Burgers_ctid_main
+```
+
+```bash
+make run_Burgers_ctid_plots
+```
+
+```bash
+make run_Burgers_ctid_main_systematic
+```
+
+**Burgers equation -  Discrete time identification**
+
+```bash
+make run_Burgers_dtid_main
+```
+
+```bash
+make run_Burgers_dtid_plots
+```
+
+```bash
+make run_Burgers_dtid_main_systematic
+```
 
 ## Hardware configuration
 

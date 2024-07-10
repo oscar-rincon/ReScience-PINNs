@@ -1,6 +1,6 @@
 # Burgers equation - Discrete time inference 
 
-![Burgers_ti](figures/Burgers_dtin.gif)
+![Burgers_dtin](figures/Burgers_dtin.gif)
 
 ## Summary
 
