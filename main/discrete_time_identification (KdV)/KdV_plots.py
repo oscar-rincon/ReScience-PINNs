@@ -302,7 +302,7 @@ gif_filename = 'figures/KdV.gif'
 
 
 # Definir el límite
-limite = 61_001
+limite = 55_001
 step = 1000
 # Cargar y graficar modelos
 for iter_num in range(step, limite, step):

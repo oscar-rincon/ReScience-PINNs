@@ -76,7 +76,7 @@ def train_adam(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50_
         error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
         results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
         if i % 100 == 0:
-            torch.save(model.state_dict(), f'models_iters/Burgers_ctid_{iter}.pt')
+            torch.save(model.state_dict(), f'models_iters/Burgers_clean_ctid_{iter}.pt')
             print(f"Adam - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
 
 def closure(model, optimizer, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2):
@@ -107,7 +107,7 @@ def closure(model, optimizer, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2):
     error_lambda_2 = np.abs(torch.exp(lambda_2).cpu().detach().numpy() -nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
     results.append([iter, loss.item(), error_lambda_1.item(), error_lambda_2.item()])
     if iter % 100 == 0:
-        torch.save(model.state_dict(), f'models_iters/Burgers_ctin_{iter}.pt')
+        torch.save(model.state_dict(), f'models_iters/Burgers_ctid_clean_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - l1: {lambda_1.cpu().detach().numpy().item()} - l2: {torch.exp(lambda_2).cpu().detach().numpy().item()}")
     return loss 
 
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     print(f"Final L2: {final_l2:.6e}")
 
     # Save training summary
-    with open('training/Burgers_ctin_clean_training_summary.txt', 'w') as file:
+    with open('training/Burgers_ctid_clean_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
         file.write(f"Total training time: {total_training_time:.6e} seconds\n")
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
     # Save training data and model state
     results = np.array(results)
-    np.savetxt("training/Burgers_ctin_clean_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
+    np.savetxt("training/Burgers_ctid_clean_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
     torch.save(model.state_dict(), 'Burgers_ctin.pt')
 
     # Calculate percentage error for lambda_1 and lambda_2
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     print(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%")
 
     # Save training summary to a text file
-    with open('training/Burgers_ctin_clean_training_summary.txt', 'w') as file:
+    with open('training/Burgers_ctid_training_summary_clean.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
         file.write(f"Total training time: {total_training_time:.2f} seconds\n")
@@ -276,10 +276,10 @@ if __name__ == "__main__":
     error_lambda_1s = np.abs(np.array(lambda_1s) - 1.0) / 1.0 * 100
     error_lambda_2s = np.abs(np.array(lambda_2s) - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
     # Save results and errors to CSV files
-    np.savetxt("training/Burgers_ctin_clean_training_data.csv", np.column_stack([results[:,0], results[:,1], error_lambda_1s, error_lambda_2s]), delimiter=",", header="Iter,Loss,ErrorLambda1,ErrorLambda2", comments="")
-    np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="Lambda1", comments="")    
-    np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="Lambda2", comments="")
+    np.savetxt("training/Burgers_clean_ctid_training_data.csv", np.column_stack([results[:,0], results[:,1], error_lambda_1s, error_lambda_2s]), delimiter=",", header="Iter,Loss,ErrorLambda1,ErrorLambda2", comments="")
+    np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="l1", comments="")    
+    np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")
     # Save model state
-    torch.save(model.state_dict(), 'Burgers_clean_ctin.pt')     
+    torch.save(model.state_dict(), 'Burgers_ctid_clean.pt')     
 
         

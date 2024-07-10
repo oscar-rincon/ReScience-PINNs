@@ -74,13 +74,6 @@ conda list -n ReScience-PINNs-env
 
 ## Running Scripts
 
-**Run all scripts in sequence:**
-
- 
-   ```bash
-   make all
-   ```
-
 ### Main scripts
 
 **Run the scripts individually:**
@@ -192,6 +185,13 @@ make run_Burgers_dtid_plots
 ```bash
 make run_Burgers_dtid_main_systematic
 ```
+
+**Run all scripts in sequence:**
+
+ 
+   ```bash
+   make all
+   ```
 
 ## Hardware configuration
 

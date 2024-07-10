@@ -387,7 +387,7 @@ savefig('figures/NS.pdf')
 
  
 # Define the limit
-limit = 231_001
+limit = 230_001
 step = 1000
 
 # Load and plot models
