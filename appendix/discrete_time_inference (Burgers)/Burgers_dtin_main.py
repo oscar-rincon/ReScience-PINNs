@@ -115,7 +115,7 @@ def closure(model, optimizer, x, x_1, x_star, dt, IRK_weights, U0_real):
     error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)
     results.append([iter, loss.item(), error])
     if iter % 100 == 0:
-        torch.save(model.state_dict(), f'models_iters/Burgers_dti_{iter}.pt')
+        torch.save(model.state_dict(), f'models_iters/Burgers_dtin_{iter}.pt')
         print(f"LBFGS - Iter: {iter} - Loss: {loss.item()} - L2: {error}")
     return loss 
 
@@ -152,7 +152,7 @@ def train_adam(model, x, x_1, x_star, dt, IRK_weights, U0_real, num_iter=50_000)
         error = np.linalg.norm(pred - Exact[idx_t1, :], 2) / np.linalg.norm(Exact[idx_t1, :], 2)
         results.append([iter, loss.item(), error])
         if i % 100 == 0:
-            torch.save(model.state_dict(), f'models_iters/Burgers_dti_{iter}.pt')
+            torch.save(model.state_dict(), f'models_iters/Burgers_dtin_{iter}.pt')
             print(f"Adam - Iter: {i} - Loss: {loss.item()} - L2: {error}")    
 
 def train_lbfgs(model, x, x_1, x_star, dt, IRK_weights, U0_real, num_iter=50_000):
@@ -198,7 +198,9 @@ if __name__ == "__main__":
         os.makedirs('models_iters')
     if not os.path.exists('training'):
         os.makedirs('training')
-
+    if not os.path.exists('tables'):
+        os.makedirs('tables')
+        
     # Initialize variables
     results = []
     iter = 0  # Initialize iteration counter
@@ -280,17 +282,17 @@ if __name__ == "__main__":
     print(f"Final L2: {final_l2:.6e}")
 
     # Save times in a text file along with the final L2 loss
-    with open('training/Burgers_dti_training_summary.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
-        file.write(f"Total iterations: {iter}\n") 
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Final L2: {final_l2:.6f}\n")
+    with open('training/Burgers_dtin_training_summary.txt', 'w') as file:
+        file.write(f"Adam training time: {adam_training_time:.2e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.2e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.2e} seconds\n")
+        file.write(f"Total iterations: {iter:.6e}\n") 
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Final L2: {final_l2:.6e}\n")
              
     # Convert results to NumPy array and save to CSV
     results = np.array(results)
-    np.savetxt("training/Burgers_dti_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
+    np.savetxt("training/Burgers_dtin_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
 
     # Save model state
-    torch.save(model.state_dict(), 'Burgers_dti.pt')
+    torch.save(model.state_dict(), 'Burgers_dtin.pt')

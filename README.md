@@ -90,69 +90,70 @@ This command will execute the following scripts sequentially:
 > - kdV_plots.py   
  
 
-
 Or to run the scripts individually.
 
-Run Schrodinger_main.py:
+### Main scripts
+
+**Schrodinger Equation - Continuous time inference:**
 
 ```bash
 make run_Schrodinger_main
 ```
 
-Run Schrodinger_plots.py:
+and
 
 ```bash
 make run_Schrodinger_plots
 ```
 
-Run AC_main.py:
+**AC Equation - Discrete time inference:**
 
 ```bash
 make run_AC_main
 ```
 
-Run AC_plots.py:
+and
 
 ```bash
 make run_AC_plots
 ```
 
-Run NS_clean_main.py:
+**NS equation - clean and noisy data - Continuous time identification:**
 
 ```bash
 make run_NS_clean_main
 ```
 
-Run NS_noisy_main.py:
 
 ```bash
 make run_NS_noisy_main
 ```
 
-Run NS_plots.py:
+and
 
 ```bash
 make run_NS_plots
 ```
 
-Run kdV_clean_main.py:
+**kdV equation - clean and noisy data - Discrete time identification:**
 
 ```bash
 make run_kdV_clean_main
 ```
 
-Run kdV_noisy_main.py:
-
+ 
 ```bash
 make run_kdV_noisy_main
 ```
 
-Run kdV_plots.py:
-
+and
+ 
 ```bash
 make run_kdV_plots
 ```
  
+### Appendix scripts
+
 ## Hardware configuration
 
 The models were trained with a NVIDIA GeForce RTX A2000 GPU card. The summary of the training information such as the computing times is included in the the folder of each simulation.

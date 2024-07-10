@@ -42,7 +42,7 @@ if not os.path.exists('figures_iters'):
     os.makedirs('figures_iters')
 
 # Load training data from CSV file
-data = pd.read_csv('training/Burgers_dti_training_data.csv')
+data = pd.read_csv('training/Burgers_dtin_training_data.csv')
 
 # Create a figure with 2 subplots arranged horizontally
 fig, axarr = plt.subplots(1, 2, figsize=figsize(1.0, 0.3, nplots=2))
@@ -63,7 +63,7 @@ axarr[1].set_ylabel(r'$\mathrm{L}_2$')  # Y-axis label using LaTeX for L2
 plt.tight_layout()
 
 # Save the figure to a PDF in the specified directory
-plt.savefig('figures/Burgers_dti_training_curves.pdf')   
+plt.savefig('figures/Burgers_dtin_training_curves.pdf')   
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -118,7 +118,7 @@ x_star.requires_grad = True
  
 # Initialize the model and apply initial weights
 model = MLP(input_size=1, output_size=q+1, hidden_layers=4, hidden_units=50, activation_function=nn.Tanh()).float().to(device)
-model_path = 'Burgers_dti.pt'
+model_path = 'Burgers_dtin.pt'
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
@@ -182,21 +182,21 @@ ax.set_xlim([lb-0.1, ub+0.1])
 ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
     
 
-savefig('./figures/Burgers')  
+plt.savefig('./figures/Burgers_dtin.pdf')  
 
 
 # Generate images for GIF
  
 model_dir = 'models_iters/'
 image_dir = 'figures_iters/'
-gif_filename = 'figures/Burgers_dti.gif'
-limit = 2_000
+gif_filename = 'figures/Burgers_dtin.gif'
+limit = 6_100
 step = 1_00
 
 for i in range(step, limit, step):
     # Initialize the model and apply initial weights
     model = MLP(input_size=1, output_size=q+1, hidden_layers=4, hidden_units=50, activation_function=nn.Tanh()).float().to(device)
-    model_path = os.path.join(model_dir, f'Burgers_dti_{i}.pt')
+    model_path = os.path.join(model_dir, f'Burgers_dtin_{i}.pt')
     model.load_state_dict(torch.load(model_path))
     model.eval()
 
@@ -259,7 +259,7 @@ for i in range(step, limit, step):
     ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
 
     # Save the figure
-    image_path = os.path.join(image_dir, f'Burgers_dti_{i}.png')
+    image_path = os.path.join(image_dir, f'Burgers_dtin_{i}.png')
     plt.savefig(image_path)
     plt.close()    
 
@@ -267,7 +267,7 @@ for i in range(step, limit, step):
 images = []
 
 for i in range(step, limit, step):
-    image_path = os.path.join(image_dir, f'Burgers_dti_{i}.png')
+    image_path = os.path.join(image_dir, f'Burgers_dtin_{i}.png')
     images.append(imageio.imread(image_path))
 
-imageio.mimsave(gif_filename, images, fps=3)  
+imageio.mimsave(gif_filename, images, fps=7)  

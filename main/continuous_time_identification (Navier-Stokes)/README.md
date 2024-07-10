@@ -1,4 +1,4 @@
-# Navier–Stokes equation
+# Navier–Stokes equation - Discrete time inference
 
 ![Navier–Stokes](figures/NS.gif)
 

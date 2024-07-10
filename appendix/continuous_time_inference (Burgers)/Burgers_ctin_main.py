@@ -73,7 +73,7 @@ def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
         results.append([iter, loss.item(), error])
         iter += 1
         if iter % 100 == 0:
-            torch.save(model.state_dict(), f'models_iters/Burgers_cti_{iter}.pt')
+            torch.save(model.state_dict(), f'models_iters/Burgers_ctin_{iter}.pt')
             print(f"Adam - Iter: {iter:.6e} - Loss: {loss.item():.6e} - L2: {error:.6e}")
 
 def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
@@ -102,7 +102,7 @@ def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
     results.append([iter, loss.item(), error]) 
     if iter % 100 == 0:
-        torch.save(model.state_dict(), f'models_iters/Burgers_cti_{iter}.pt')
+        torch.save(model.state_dict(), f'models_iters/Burgers_ctin_{iter}.pt')
         print(f"LBFGS - Iter: {iter:.6e} - Loss: {loss.item():.6e} - L2: {error:.6e}")   
     return loss
 
@@ -238,7 +238,7 @@ if __name__ == "__main__":
     print(f"Final L2: {final_l2:.6e}")
 
     # Save training summary
-    with open('training/Burgers_cti_training_summary.txt', 'w') as file:
+    with open('training/Burgers_ctin_training_summary.txt', 'w') as file:
         file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
         file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
         file.write(f"Total training time: {total_training_time:.6e} seconds\n")
@@ -248,5 +248,5 @@ if __name__ == "__main__":
 
     # Save training data and model state
     results = np.array(results)
-    np.savetxt("training/Burgers_cti_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
-    torch.save(model.state_dict(), 'Burgers_cti.pt')
+    np.savetxt("training/Burgers_ctin_training_data.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
+    torch.save(model.state_dict(), 'Burgers_ctin.pt')

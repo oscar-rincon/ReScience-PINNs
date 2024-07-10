@@ -1,6 +1,6 @@
-# Burgers equation time inference
+# Burgers equation - Continuous time inference
 
-![Burgers_ti](figures/Burgers_ti.gif)
+![Burgers_ti](figures/Burgers_ctin.gif)
 
 ## Summary
 
@@ -19,13 +19,13 @@ make all
 or
 
 ```bash
-make run_Burgers_ti_main
+make run_Burgers_ctin_main
 ```
 
 and then 
 
 ```bash
-make run_Burgers_ti_plots
+make run_Burgers_ctin_plots
 ```
 
 to clean generated files:

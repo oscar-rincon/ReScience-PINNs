@@ -1,4 +1,4 @@
-# Schrodinger equation
+# Schrodinger equation - Continuous time inference
 
 ![Schrodinger](figures/Schrodinger.gif)
 

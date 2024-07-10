@@ -1,4 +1,4 @@
-# Allen–Cahn equation
+# Allen–Cahn equation - Discrete time inference
 
 ![Allen–Cahn](figures/AC.gif)
 

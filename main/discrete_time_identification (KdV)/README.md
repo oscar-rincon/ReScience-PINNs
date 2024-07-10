@@ -1,4 +1,4 @@
-# Korteweg–de Vries equation
+# Korteweg–de Vries equation - Discrete time identification
 
  ![Korteweg–de Vries](figures/KdV.gif)
 
