@@ -112,8 +112,6 @@ make run_Schrodinger_plots
 make run_AC_main
 ```
 
-and
-
 ```bash
 make run_AC_plots
 ```
@@ -124,12 +122,9 @@ make run_AC_plots
 make run_NS_clean_main
 ```
 
-
 ```bash
 make run_NS_noisy_main
 ```
-
-and
 
 ```bash
 make run_NS_plots
@@ -141,12 +136,10 @@ make run_NS_plots
 make run_kdV_clean_main
 ```
 
- 
 ```bash
 make run_kdV_noisy_main
 ```
 
-and
  
 ```bash
 make run_kdV_plots
