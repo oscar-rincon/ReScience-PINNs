@@ -100,8 +100,6 @@ Or to run the scripts individually.
 make run_Schrodinger_main
 ```
 
-and
-
 ```bash
 make run_Schrodinger_plots
 ```
