@@ -65,7 +65,6 @@ plt.tight_layout()
 # Save the figure to a PDF in the specified directory
 plt.savefig('figures/Burgers_dtin_training_curves.pdf')   
 
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device: {device}')
 
@@ -73,16 +72,13 @@ q = 500
 noise = 0.0  # Noise level (unused)
 N_u = 100  # Number of training points for u
 N_f = 10_000  # Number of training points for f
-
 N = 250
 lb = np.array([-1.0])
 ub = np.array([1.0])    
 data = scipy.io.loadmat('../Data/burgers_shock.mat')
-
 t = data['t'].flatten()[:,None] # T x 1
 x = data['x'].flatten()[:,None] # N x 1
 Exact = np.real(data['usol']).T.astype(np.float32) # T x N
-
 idx_t0 = 10
 idx_t1 = 90
 dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float32)  # Time step size
@@ -184,7 +180,6 @@ ax.legend(loc='upper center', bbox_to_anchor=(0.1, -0.3), ncol=2, frameon=False)
 
 plt.savefig('./figures/Burgers_dtin.pdf')  
 
-
 # Generate images for GIF
  
 model_dir = 'models_iters/'
@@ -202,9 +197,6 @@ for i in range(step, limit, step):
 
     U1_pred = model(x_star)
     U1_pred = U1_pred.cpu().detach().numpy()
-
-    #error = np.linalg.norm(U1_pred[:,-1] - Exact[idx_t1,:], 2)/np.linalg.norm(Exact[idx_t1,:], 2)
-    #print('Error: %e' % (error))
 
     ######################################################################
     ############################# Plotting ###############################

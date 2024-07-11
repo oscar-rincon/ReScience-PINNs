@@ -22,24 +22,7 @@ from pinns import *  # Physics Informed Neural Networks utilities
 
 # Suppress warnings to keep the output noisy
 warnings.filterwarnings("ignore")
-
-
-def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')):
-    """
-    Computes the second-order gradient of `dy` with respect to `x`.
-
-    Args:
-        dy (torch.Tensor): The tensor whose gradient will be computed.
-        x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
-        device (torch.device, optional): The device on which the tensors will be allocated. Defaults to torch.device('cpu').
-
-    Returns:
-        torch.Tensor: The second-order gradient of `dy` with respect to `x`.
-    """
-    z = torch.ones(dy.shape, dtype=torch.float32, requires_grad=True, device=device)
-    g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]
-    return torch.autograd.grad(g, z, grad_outputs=torch.ones(g.shape, dtype=torch.float32, device=device), create_graph=True)[0]
-
+ 
 
 def net_U0(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     """
@@ -47,16 +30,15 @@ def net_U0(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
 
     Args:
         model (torch.nn.Module): The neural network model that represents the dynamical system.
-        x_0 (torch.Tensor): The initial state of the system.
-        x_1 (torch.Tensor): The final state of the system for which we want to predict the derivatives.
+        x (torch.Tensor): The spatial input tensor for the system.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution, before applying the exponential function.
         dt (float): The time step for the simulation.
-        IRK_weights (torch.Tensor): The weights for the IRK integration method.
+        IRK_alpha (torch.Tensor): The alpha coefficients for the IRK integration method.
+        IRK_beta (torch.Tensor): The beta coefficients for the IRK integration method.
 
     Returns:
-        tuple: A tuple containing:
-            - U0 (torch.Tensor): The predicted state of the system at the next time step.
-            - U1 (torch.Tensor): The state of the system at x_1 as predicted by the model.
-            - U1_x (torch.Tensor): The spatial derivative of the system's state at x_1.
+        torch.Tensor: The predicted state of the system at the next time step after applying the IRK integration method.
     """
     lambda_2 = torch.exp(lambda_2)
     U = model(x)
@@ -73,16 +55,15 @@ def net_U1(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
 
     Args:
         model (torch.nn.Module): The neural network model that represents the dynamical system.
-        x_0 (torch.Tensor): The initial state of the system.
-        x_1 (torch.Tensor): The final state of the system for which we want to predict the derivatives.
+        x (torch.Tensor): The spatial input tensor for the system.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution, before applying the exponential function.
         dt (float): The time step for the simulation.
-        IRK_weights (torch.Tensor): The weights for the IRK integration method.
+        IRK_alpha (torch.Tensor): The alpha coefficients for the IRK integration method.
+        IRK_beta (torch.Tensor): The beta coefficients for the IRK integration method.
 
     Returns:
-        tuple: A tuple containing:
-            - U0 (torch.Tensor): The predicted state of the system at the next time step.
-            - U1 (torch.Tensor): The state of the system at x_1 as predicted by the model.
-            - U1_x (torch.Tensor): The spatial derivative of the system's state at x_1.
+        torch.Tensor: The predicted state of the system at the next time step after applying the IRK integration method.
     """
     lambda_2 = torch.exp(lambda_2)
     U = model(x)
@@ -93,6 +74,27 @@ def net_U1(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     return U1 
 
 def mse(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
+    """
+    Calculates the mean squared error (MSE) between the predicted and actual values for two time steps.
+
+    This function computes the MSE for the predictions of a neural network model at two different time steps. It uses
+    the model to predict the system's state at these time steps and compares these predictions to the actual values.
+
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x0 (torch.Tensor): The spatial input tensor for the first time step.
+        x1 (torch.Tensor): The spatial input tensor for the second time step.
+        u0 (torch.Tensor): The actual values of the system's state at the first time step.
+        u1 (torch.Tensor): The actual values of the system's state at the second time step.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution.
+        dt (float): The time difference between the two time steps.
+        IRK_alpha (torch.Tensor): The IRK (Implicit Runge-Kutta) alpha coefficients.
+        IRK_beta (torch.Tensor): The IRK beta coefficients.
+
+    Returns:
+        torch.Tensor: The calculated mean squared error between the predicted and actual values for the two time steps.
+    """    
     U0 = net_U0(model, x0, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta)
     U1 = net_U1(model, x1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta)
     return torch.sum((u0-U0)**2)  + torch.sum((u1-U1)**2)  
@@ -138,17 +140,20 @@ def train_adam(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_bet
 
 def closure(model, optimizer, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     """
-    Performs a single optimization step using the provided model and optimizer, and calculates the loss.
- 
+    Performs a single optimization step using the provided model and optimizer, and calculates the loss based on the mean squared error between the model's predictions and the observed data, as well as the PDE residual.
+
     Args:
         model (torch.nn.Module): The neural network model to be optimized.
         optimizer (torch.optim.Optimizer): The optimizer to use for the optimization step.
-        x_u (torch.Tensor): The spatial input tensor for the observed data.
-        x_f (torch.Tensor): The spatial input tensor for the PDE residual calculation.
-        t_u (torch.Tensor): The temporal input tensor for the observed data.
-        t_f (torch.Tensor): The temporal input tensor for the PDE residual calculation.
-        nu (float): The viscosity parameter for the PDE.
-        u_train_pt (torch.Tensor): The observed data values corresponding to x_u and t_u.
+        x0 (torch.Tensor): The spatial input tensor for the initial state of the system.
+        x1 (torch.Tensor): The spatial input tensor for the final state of the system.
+        u0 (torch.Tensor): The observed initial state values of the system.
+        u1 (torch.Tensor): The observed final state values of the system.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution, before applying the exponential function.
+        dt (float): The time step for the simulation.
+        IRK_alpha (torch.Tensor): The alpha coefficients for the IRK integration method.
+        IRK_beta (torch.Tensor): The beta coefficients for the IRK integration method.
 
     Returns:
         torch.Tensor: The calculated loss for the current optimization step.
@@ -170,22 +175,24 @@ def closure(model, optimizer, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha,
 
 def train_lbfgs(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, num_iter=50_000):
     """
-    Trains a neural network model using the LBFGS optimizer to solve a PDE problem.
- 
+    Trains a neural network model using the LBFGS optimizer to solve a PDE problem by minimizing the difference between observed data and model predictions, as well as ensuring the PDE residuals are minimized.
+
     Args:
         model (torch.nn.Module): The neural network model to be trained.
-        x_u (torch.Tensor): The spatial input tensor for the observed data.
-        x_f (torch.Tensor): The spatial input tensor for the PDE residual calculation.
-        t_u (torch.Tensor): The temporal input tensor for the observed data.
-        t_f (torch.Tensor): The temporal input tensor for the PDE residual calculation.
-        nu (float): The viscosity parameter for the PDE.
-        u_train_pt (torch.Tensor): The observed data values corresponding to x_u and t_u.
+        x0 (torch.Tensor): The spatial input tensor for the initial state of the system.
+        x1 (torch.Tensor): The spatial input tensor for the final state of the system.
+        u0 (torch.Tensor): The observed initial state values of the system.
+        u1 (torch.Tensor): The observed final state values of the system.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution, before applying the exponential function.
+        dt (float): The time step for the simulation.
+        IRK_alpha (torch.Tensor): The alpha coefficients for the IRK integration method.
+        IRK_beta (torch.Tensor): The beta coefficients for the IRK integration method.
         num_iter (int, optional): The maximum number of iterations for the LBFGS optimizer. Defaults to 50,000.
 
     Note:
         The `closure` function required by the LBFGS optimizer is defined externally and must be available in the
-        scope where this function is called. It should accept the model, optimizer, and all data tensors as arguments,
-        and return the computed loss.
+        scope where this function is called. It should accept the model, optimizer, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta as arguments, and return the computed loss.
     """
     optimizer = torch.optim.LBFGS(list(model.parameters()) + [lambda_1, lambda_2],
                                   lr=1,
@@ -220,34 +227,22 @@ if __name__ == "__main__":
     nu = 0.01/torch.pi 
     nu = torch.tensor(nu).float().to(device)  # Viscosity coefficient
     skip = 80
-
     N0 = 199
-    N1 = 201
-    
-    data = scipy.io.loadmat('../Data/burgers_shock.mat')
-    
+    N1 = 201   
+    data = scipy.io.loadmat('../Data/burgers_shock.mat') 
     t_star = data['t'].flatten()[:,None]
     x_star = data['x'].flatten()[:,None]
-    Exact = np.real(data['usol'])
-    
+    Exact = np.real(data['usol']) 
     idx_t = 10
-
-    ######################################################################
-    ######################## Noiseles Data ###############################
-    ######################################################################
     noise = 0.01    
-    
     idx_x = np.random.choice(Exact.shape[0], N0, replace=False)
     x0 = x_star[idx_x,:]
     u0 = Exact[idx_x,idx_t][:,None]
-    u0 = u0 + noise*np.std(u0)*np.random.randn(u0.shape[0], u0.shape[1])
-        
+    u0 = u0 + noise*np.std(u0)*np.random.randn(u0.shape[0], u0.shape[1])  
     idx_x = np.random.choice(Exact.shape[0], N1, replace=False)
     x1 = x_star[idx_x,:]
     u1 = Exact[idx_x,idx_t + skip][:,None]
     u1 = u1 + noise*np.std(u1)*np.random.randn(u1.shape[0], u1.shape[1])
-
-    #dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float32)  # Time step size
     dt =  t_star[idx_t+skip] - t_star[idx_t]         
     q = int(np.ceil(0.5*np.log(np.finfo(float).eps)/np.log(dt)))
     dt = torch.from_numpy(dt).to(torch.float32).to(device)  # Time step size

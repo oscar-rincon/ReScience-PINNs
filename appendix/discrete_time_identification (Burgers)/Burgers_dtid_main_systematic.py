@@ -22,25 +22,7 @@ from pinns import *  # Physics Informed Neural Networks utilities
 
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
-
-
-def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')):
-    """
-    Computes the second-order gradient of `dy` with respect to `x`.
-
-    Args:
-        dy (torch.Tensor): The tensor whose gradient will be computed.
-        x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
-        device (torch.device, optional): The device on which the tensors will be allocated. Defaults to torch.device('cpu').
-
-    Returns:
-        torch.Tensor: The second-order gradient of `dy` with respect to `x`.
-    """
-    z = torch.ones(dy.shape, dtype=torch.float32, requires_grad=True, device=device)
-    g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]
-    return torch.autograd.grad(g, z, grad_outputs=torch.ones(g.shape, dtype=torch.float32, device=device), create_graph=True)[0]
-
-
+ 
 def net_U0(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     """
     Simulates one step of a dynamical system using a neural network model and IRK integration.

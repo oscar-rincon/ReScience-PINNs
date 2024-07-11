@@ -101,34 +101,22 @@ plt.savefig('figures/Burgers_dtid_lambda_curves.pdf')
 nu = 0.01/torch.pi 
 nu = torch.tensor(nu).float().to(device)  # Viscosity coefficient
 skip = 80
-
 N0 = 199
 N1 = 201
-
 data = scipy.io.loadmat('../Data/burgers_shock.mat')
-
 t_star = data['t'].flatten()[:,None]
 x_star = data['x'].flatten()[:,None]
 Exact = np.real(data['usol'])
-
 idx_t = 10
-
-######################################################################
-######################## Noiseles Data ###############################
-######################################################################
 noise = 0.0    
-
 idx_x = np.random.choice(Exact.shape[0], N0, replace=False)
 x0 = x_star[idx_x,:]
 u0 = Exact[idx_x,idx_t][:,None]
-u0 = u0 + noise*np.std(u0)*np.random.randn(u0.shape[0], u0.shape[1])
-    
+u0 = u0 + noise*np.std(u0)*np.random.randn(u0.shape[0], u0.shape[1])  
 idx_x = np.random.choice(Exact.shape[0], N1, replace=False)
 x1 = x_star[idx_x,:]
 u1 = Exact[idx_x,idx_t + skip][:,None]
 u1 = u1 + noise*np.std(u1)*np.random.randn(u1.shape[0], u1.shape[1])
-
-#dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float32)  # Time step size
 dt =  t_star[idx_t+skip] - t_star[idx_t]         
 q = int(np.ceil(0.5*np.log(np.finfo(float).eps)/np.log(dt)))
 dt = torch.from_numpy(dt).to(torch.float32).to(device)  # Time step size
@@ -176,9 +164,7 @@ x1 = x1.cpu().detach().numpy()
 u0 = u0.cpu().detach().numpy()
 u1 = u1.cpu().detach().numpy()
 
-######################################################################
-############################# Plotting ###############################
-######################################################################
+# Plotting
 
 fig, ax = newfig(1.0, 1.5)
 ax.axis('off')
@@ -263,9 +249,7 @@ for iter_num in range(step, limit, step):
     lambda_1_value_noisy = lambda_1_values_noisy['l1'][iter_num_noisy]
     lambda_2_value_noisy = lambda_2_values_noisy['l2'][iter_num_noisy]
 
-    ######################################################################
-    ############################# Plotting ###############################
-    ######################################################################
+    # Plotting
 
     fig, ax = newfig(1.0, 1.5)
     ax.axis('off')

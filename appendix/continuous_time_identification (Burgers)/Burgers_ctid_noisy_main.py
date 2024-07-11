@@ -24,6 +24,22 @@ from pinns import *  # Physics Informed Neural Networks utilities
 warnings.filterwarnings("ignore")
 
 def f(model, x, t, nu, lambda_1, lambda_2):
+    """
+    Computes the residual of the PDE using the given neural network model.
+
+    This function calculates the PDE residual for a given set of inputs and parameters. It uses the neural network model to predict the system's state and then computes the residual of the PDE based on these predictions.
+
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x (torch.Tensor): The spatial input tensor.
+        t (torch.Tensor): The temporal input tensor.
+        nu (float): The viscosity parameter of the PDE.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution, before applying the exponential function.
+
+    Returns:
+        torch.Tensor: The computed PDE residual.
+    """    
     lambda_2 = torch.exp(lambda_2)
     u = model(torch.cat((x, t), dim=1))
     u_t = derivative(u, t, order=1)
@@ -33,10 +49,40 @@ def f(model, x, t, nu, lambda_1, lambda_2):
     return f
 
 def mse_f(model, x, t, nu, lambda_1, lambda_2):
+    """
+    Calculates the mean squared error of the PDE residuals.
+
+    This function computes the mean squared error (MSE) of the PDE residuals for a given set of inputs, parameters, and a neural network model. It is used to evaluate how well the model's predictions satisfy the PDE.
+
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x (torch.Tensor): The spatial input tensor.
+        t (torch.Tensor): The temporal input tensor.
+        nu (float): The viscosity parameter of the PDE.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution.
+
+    Returns:
+        torch.Tensor: The mean squared error of the PDE residuals.
+    """    
     f_pred = f(model, x, t, nu,lambda_1, lambda_2)
     return (f_pred**2).mean()
 
 def mse_u(model, x, t, u_train_pt):
+    """
+    Calculates the mean squared error between the predicted and actual values.
+
+    This function computes the mean squared error (MSE) between the predicted values of the system's state, using the neural network model, and the actual values at the given spatial and temporal points.
+
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x (torch.Tensor): The spatial input tensor.
+        t (torch.Tensor): The temporal input tensor.
+        u_train_pt (torch.Tensor): The actual values of the system's state at the input points.
+
+    Returns:
+        torch.Tensor: The mean squared error between the predicted and actual values.
+    """    
     u = model(torch.cat((x, t), dim=1))
     return ((u_train_pt - u) ** 2).mean()
 
@@ -47,19 +93,19 @@ def train_adam(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50_
     Args:
         model: The neural network model to be trained.
         x_u: The spatial input tensor for the observed data.
-        x_f: The spatial input tensor for the PDE residual calculation.
         t_u: The temporal input tensor for the observed data.
-        t_f: The temporal input tensor for the PDE residual calculation.
         nu: The viscosity parameter for the PDE.
         u_train_pt: The observed data values corresponding to x_u and t_u.
+        lambda_1: The first learnable parameter for the PDE solution.
+        lambda_2: The second learnable parameter for the PDE solution.
         num_iter (int, optional): The number of iterations to train the model. Defaults to 50,000.
 
     Note:
         The function uses global variables `iter` and `results` to track the iteration count and to store
         the training progress, respectively. `iter` is incremented with each iteration, and `results` stores
-        tuples of (iteration number, loss, L2 error). Ensure these are properly initialized before calling this function.
+        tuples of (iteration number, loss, lambda_1 error, lambda_2 error). Ensure these are properly initialized before calling this function.
         
-        The function also saves the model state every 1000 iterations to a file named 'Burgers_{iter}.pt' in the 'models_iters' directory.
+        The function also saves the model state every 100 iterations to a file named 'Burgers_clean_ctid_{iter}.pt' in the 'models_iters' directory.
     """
     optimizer = torch.optim.Adam(list(model.parameters()) + [lambda_1, lambda_2], lr=1e-3)
     global iter
@@ -87,11 +133,11 @@ def closure(model, optimizer, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2):
         model (torch.nn.Module): The neural network model to be optimized.
         optimizer (torch.optim.Optimizer): The optimizer to use for the optimization step.
         x_u (torch.Tensor): The spatial input tensor for the observed data.
-        x_f (torch.Tensor): The spatial input tensor for the PDE residual calculation.
         t_u (torch.Tensor): The temporal input tensor for the observed data.
-        t_f (torch.Tensor): The temporal input tensor for the PDE residual calculation.
         nu (float): The viscosity parameter for the PDE.
         u_train_pt (torch.Tensor): The observed data values corresponding to x_u and t_u.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution.
 
     Returns:
         torch.Tensor: The calculated loss for the current optimization step.
@@ -118,17 +164,17 @@ def train_lbfgs(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50
     Args:
         model (torch.nn.Module): The neural network model to be trained.
         x_u (torch.Tensor): The spatial input tensor for the observed data.
-        x_f (torch.Tensor): The spatial input tensor for the PDE residual calculation.
         t_u (torch.Tensor): The temporal input tensor for the observed data.
-        t_f (torch.Tensor): The temporal input tensor for the PDE residual calculation.
         nu (float): The viscosity parameter for the PDE.
         u_train_pt (torch.Tensor): The observed data values corresponding to x_u and t_u.
+        lambda_1 (torch.Tensor): The first learnable parameter for the PDE solution.
+        lambda_2 (torch.Tensor): The second learnable parameter for the PDE solution.
         num_iter (int, optional): The maximum number of iterations for the LBFGS optimizer. Defaults to 50,000.
 
     Note:
         The `closure` function required by the LBFGS optimizer is defined externally and must be available in the
-        scope where this function is called. It should accept the model, optimizer, and all data tensors as arguments,
-        and return the computed loss.
+        scope where this function is called. It should accept the model, optimizer, x_u, t_u, nu, u_train_pt, lambda_1, 
+        lambda_2 as arguments, and return the computed loss.
     """
     optimizer = torch.optim.LBFGS(list(model.parameters()) + [lambda_1, lambda_2],
                                   lr=1,
@@ -186,12 +232,8 @@ if __name__ == "__main__":
     # Convert to tensors and set requires_grad for training with float precision
     x_u = torch.from_numpy(X_u_train[:, 0:1]).float().to(device)
     x_u.requires_grad = True
-    #x_f = torch.from_numpy(X_f_train[:, 0:1]).float().to(device)
-    #x_f.requires_grad = True
     t_u = torch.from_numpy(X_u_train[:, 1:2]).float().to(device)
     t_u.requires_grad = True
-    #t_f = torch.from_numpy(X_f_train[:, 1:2]).float().to(device)
-    #t_f.requires_grad = True
     u_train_pt = torch.from_numpy(u_train).float().to(device)
     nu = torch.tensor(nu).float().to(device)
     x_star = torch.from_numpy(X_star[:, 0:1]).float().to(device)

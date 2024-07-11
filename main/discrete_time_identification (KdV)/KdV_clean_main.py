@@ -26,22 +26,6 @@ from functools import partial
 warnings.filterwarnings("ignore")
  
  
-def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
-    """
-    Computes the first-order forward gradient of a given tensor with respect to another tensor.
-
-    Args:
-        dy (torch.Tensor): The tensor whose gradient will be computed.
-        x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
-
-    Returns:
-        torch.Tensor: The computed first-order forward gradient.
-    """
-    z = torch.ones(dy.shape, device=dy.device).requires_grad_()
-    g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]
-    ones = torch.ones(g.shape, device=g.device)
-    return torch.autograd.grad(g, z, grad_outputs=ones, create_graph=True)[0]
- 
 def net_U0(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha):
     """
     Computes the prediction of U0 using the given neural network model and parameters.

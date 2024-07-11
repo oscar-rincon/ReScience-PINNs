@@ -24,6 +24,17 @@ from pinns import *  # Physics Informed Neural Networks utilities
 warnings.filterwarnings("ignore")
 
 def f(model, x, t, nu):
+    """Calculates the residual of the Burgers' equation for a given input.
+
+    Args:
+        model (torch.nn.Module): The neural network model used to approximate the solution.
+        x (torch.Tensor): The spatial input tensor.
+        t (torch.Tensor): The temporal input tensor.
+        nu (float): The viscosity coefficient of the fluid.
+
+    Returns:
+        torch.Tensor: The calculated residual of the Burgers' equation.
+    """    
     u = model(torch.cat((x, t), dim=1))
     u_t = derivative(u, t, order=1)
     u_x = derivative(u, x, order=1)
@@ -32,10 +43,38 @@ def f(model, x, t, nu):
     return f
 
 def mse_f(model, x, t, nu):
+    """Calculates the mean squared error (MSE) of the Burgers' equation residual.
+
+    This function computes the residual of the Burgers' equation using the specified model and inputs, 
+    then calculates the MSE of this residual as a measure of the model's accuracy.
+
+    Args:
+        model (torch.nn.Module): The neural network model used to approximate the solution.
+        x (torch.Tensor): The spatial input tensor.
+        t (torch.Tensor): The temporal input tensor.
+        nu (float): The viscosity coefficient of the fluid.
+
+    Returns:
+        torch.Tensor: The mean squared error of the Burgers' equation residual.
+    """    
     f_pred = f(model, x, t, nu)
     return (f_pred**2).mean()
 
 def mse_u(model, x, t, u_train_pt):
+    """
+    Calculates the mean squared error (MSE) between the predicted and actual values of a physical system.
+
+    This function takes a model, spatial and temporal inputs, and the actual values at those points. It predicts the system's state using the model and calculates the MSE between these predictions and the actual values.
+
+    Args:
+        model (torch.nn.Module): The neural network model used for prediction.
+        x (torch.Tensor): The spatial input tensor.
+        t (torch.Tensor): The temporal input tensor.
+        u_train_pt (torch.Tensor): The actual values of the system's state at the input points.
+
+    Returns:
+        torch.Tensor: The mean squared error between the predicted and actual values.
+    """    
     u = model(torch.cat((x, t), dim=1))
     return ((u_train_pt - u) ** 2).mean()
 
@@ -135,26 +174,12 @@ def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
     optimizer.step(closure_fn)
 
 def main_loop(N_u, N_f, num_layers, num_neurons): 
-    # Set a fixed seed for reproducibility
-    #set_seed(42)
-
-    # Check GPU availability and select device
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    #print(f'Using device: {device}')
-
-    # Create directories for storing models and training data if they don't exist
-    #if not os.path.exists('models_iters'):
-    #    os.makedirs('models_iters')
-    #if not os.path.exists('training'):
-    #    os.makedirs('training')
 
     # Initialize variables
     
     iter = 0  # Initialize iteration counter
     nu = 0.01 / np.pi  # Viscosity
     noise = 0.0  # Noise level (unused)
-    #N_u = 100  # Number of training points for u
-    #N_f = 10_000  # Number of training points for f
 
     # Load data
     data = scipy.io.loadmat('../Data/burgers_shock.mat')

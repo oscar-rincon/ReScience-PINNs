@@ -23,31 +23,15 @@ from pinns import *  # Physics Informed Neural Networks utilities
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
 
-
-def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')):
-    """
-    Computes the second-order gradient of `dy` with respect to `x`.
-
-    Args:
-        dy (torch.Tensor): The tensor whose gradient will be computed.
-        x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
-        device (torch.device, optional): The device on which the tensors will be allocated. Defaults to torch.device('cpu').
-
-    Returns:
-        torch.Tensor: The second-order gradient of `dy` with respect to `x`.
-    """
-    z = torch.ones(dy.shape, dtype=torch.float32, requires_grad=True, device=device)
-    g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]
-    return torch.autograd.grad(g, z, grad_outputs=torch.ones(g.shape, dtype=torch.float32, device=device), create_graph=True)[0]
-
+ 
 def f(model, x, x_1, dt, IRK_weights):
     """
     Simulates one step of a dynamical system using a neural network model and IRK integration.
 
     Args:
         model (torch.nn.Module): The neural network model that represents the dynamical system.
-        x_0 (torch.Tensor): The initial state of the system.
-        x_1 (torch.Tensor): The final state of the system for which we want to predict the derivatives.
+        x (torch.Tensor): The current state of the system.
+        x_1 (torch.Tensor): The next state of the system for which we want to predict the derivatives.
         dt (float): The time step for the simulation.
         IRK_weights (torch.Tensor): The weights for the IRK integration method.
 
@@ -55,7 +39,7 @@ def f(model, x, x_1, dt, IRK_weights):
         tuple: A tuple containing:
             - U0 (torch.Tensor): The predicted state of the system at the next time step.
             - U1 (torch.Tensor): The state of the system at x_1 as predicted by the model.
-            - U1_x (torch.Tensor): The spatial derivative of the system's state at x_1.
+            - U_x (torch.Tensor): The spatial derivative of the system's state at the current state x.
     """
     nu = 0.01/torch.pi
     U1 = model(x)
@@ -93,14 +77,15 @@ def closure(model, optimizer, x, x_1, x_star, dt, IRK_weights, U0_real):
     Args:
         model (torch.nn.Module): The neural network model being trained.
         optimizer (torch.optim.Optimizer): The optimizer used for training.
-        x_0 (torch.Tensor): The initial condition input to the model.
+        x (torch.Tensor): The initial condition input to the model.
         x_1 (torch.Tensor): The boundary condition input to the model.
+        x_star (torch.Tensor): The input tensor for prediction and error calculation.
         dt (float): The time step size.
         IRK_weights (torch.Tensor): The weights for the implicit Runge-Kutta method.
         U0_real (torch.Tensor): The real values of the initial condition for loss computation.
-        Exact (numpy.ndarray): The exact solution of the system for error calculation.
-        idx_t1 (int): The index of the time step at which the error is calculated.
-        results (list): A list to store the iteration number, loss, and L2 error for logging.
+
+    Note:
+        This function assumes the existence of global variables `Exact`, `idx_t1`, and `results` for error calculation and logging, respectively. `Exact` is a numpy.ndarray representing the exact solution of the system, `idx_t1` is an integer indicating the time step index for error calculation, and `results` is a list used to store iteration number, loss, and L2 error for logging purposes.
 
     Returns:
         torch.Tensor: The computed loss for the current optimization step.
@@ -125,19 +110,16 @@ def train_adam(model, x, x_1, x_star, dt, IRK_weights, U0_real, num_iter=50_000)
 
     Args:
         model (torch.nn.Module): The neural network model to be trained.
-        x_0 (torch.Tensor): The initial condition input to the model.
+        x (torch.Tensor): The initial condition input to the model.
         x_1 (torch.Tensor): The boundary condition input to the model.
+        x_star (torch.Tensor): The input tensor for prediction and error calculation.
         dt (float): The time step size.
         IRK_weights (torch.Tensor): The weights for the implicit Runge-Kutta method.
         U0_real (torch.Tensor): The real values of the initial condition for loss computation.
-        Exact (numpy.ndarray): The exact solution of the system for error calculation.
-        idx_t1 (int): The index of the time step at which the error is calculated.
-        results (list): A list to store the iteration number, loss, and L2 error for logging.
         num_iter (int, optional): The number of iterations for training. Defaults to 50,000.
 
     Note:
-        The function assumes the presence of a global variable `iter` used for tracking the
-        iteration count across different training sessions.
+        The function assumes the presence of global variables `Exact`, `idx_t1`, and `results` for error calculation and logging, respectively. `Exact` is a numpy.ndarray representing the exact solution of the system, `idx_t1` is an integer indicating the time step index for error calculation, and `results` is a list used to store iteration number, loss, and L2 error for logging purposes. It also assumes a global variable `iter` used for tracking the iteration count across different training sessions.
     """
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     global iter
@@ -158,21 +140,20 @@ def train_adam(model, x, x_1, x_star, dt, IRK_weights, U0_real, num_iter=50_000)
 def train_lbfgs(model, x, x_1, x_star, dt, IRK_weights, U0_real, num_iter=50_000):
     """
     Trains a neural network model using the LBFGS optimizer to solve a PDE problem.
- 
+
     Args:
         model (torch.nn.Module): The neural network model to be trained.
-        x_u (torch.Tensor): The spatial input tensor for the observed data.
-        x_f (torch.Tensor): The spatial input tensor for the PDE residual calculation.
-        t_u (torch.Tensor): The temporal input tensor for the observed data.
-        t_f (torch.Tensor): The temporal input tensor for the PDE residual calculation.
-        nu (float): The viscosity parameter for the PDE.
-        u_train_pt (torch.Tensor): The observed data values corresponding to x_u and t_u.
+        x (torch.Tensor): The initial condition input to the model.
+        x_1 (torch.Tensor): The boundary condition input to the model.
+        x_star (torch.Tensor): The input tensor for prediction and error calculation.
+        dt (float): The time step size.
+        IRK_weights (torch.Tensor): The weights for the implicit Runge-Kutta method.
+        U0_real (torch.Tensor): The real values of the initial condition for loss computation.
         num_iter (int, optional): The maximum number of iterations for the LBFGS optimizer. Defaults to 50,000.
 
     Note:
         The `closure` function required by the LBFGS optimizer is defined externally and must be available in the
-        scope where this function is called. It should accept the model, optimizer, and all data tensors as arguments,
-        and return the computed loss.
+        scope where this function is called. It should accept the model, optimizer, x, x_1, x_star, dt, IRK_weights, U0_real as arguments, and return the computed loss.
     """
     optimizer = torch.optim.LBFGS(model.parameters(),
                                   lr=1,
@@ -208,16 +189,13 @@ if __name__ == "__main__":
     noise = 0.0  # Noise level (unused)
     N_u = 100  # Number of training points for u
     N_f = 10_000  # Number of training points for f
-
     N = 250
     lb = np.array([-1.0])
     ub = np.array([1.0])    
     data = scipy.io.loadmat('../Data/burgers_shock.mat')
-    
     t = data['t'].flatten()[:,None] # T x 1
     x = data['x'].flatten()[:,None] # N x 1
     Exact = np.real(data['usol']).T.astype(np.float32) # T x N
-    
     idx_t0 = 10
     idx_t1 = 90
     dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float32)  # Time step size
@@ -229,7 +207,6 @@ if __name__ == "__main__":
     u0 = Exact[idx_t0:idx_t0+1,idx_x].T
     u0 = u0 + noise_u0*np.std(u0)*np.random.randn(u0.shape[0], u0.shape[1])
     
-       
     # Boudanry data
     x1 = np.vstack((lb,ub))
     
@@ -250,9 +227,6 @@ if __name__ == "__main__":
     dt = dt.to(device)  # Move time step size
     x_star = torch.from_numpy(x_star).float().to(device)
     x_star.requires_grad = True    
-
-
-
 
     # Initialize the model and apply initial weights
     model = MLP(input_size=1, output_size=q+1, hidden_layers=4, hidden_units=50, activation_function=nn.Tanh()).float().to(device)

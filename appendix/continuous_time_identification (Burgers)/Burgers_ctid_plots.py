@@ -142,12 +142,8 @@ u_train = u_train + noise*np.std(u_train)*np.random.randn(u_train.shape[0], u_tr
 # Convert to tensors and set requires_grad for training with float precision
 x_u = torch.from_numpy(X_u_train[:, 0:1]).float().to(device)
 x_u.requires_grad = True
-#x_f = torch.from_numpy(X_f_train[:, 0:1]).float().to(device)
-#x_f.requires_grad = True
 t_u = torch.from_numpy(X_u_train[:, 1:2]).float().to(device)
 t_u.requires_grad = True
-#t_f = torch.from_numpy(X_f_train[:, 1:2]).float().to(device)
-#t_f.requires_grad = True
 u_train_pt = torch.from_numpy(u_train).float().to(device)
 nu = torch.tensor(nu).float().to(device)
 x_star = torch.from_numpy(X_star[:, 0:1]).float().to(device)
@@ -167,10 +163,7 @@ u_pred = model(torch.cat((x_star, t_star), dim=1))
 U_pred = griddata(torch.cat((x_star, t_star), dim=1).cpu().detach().numpy(), u_pred.flatten().cpu().detach().numpy(), (X, T), method='cubic')
 min_value = np.min(-1)
 max_value = np.max(1)
-# lambda_1_value = lambda_1_values_clean['Lambda1'].iloc[-1] if isinstance(lambda_1_values_clean['Lambda1'], pd.Series) else lambda_1_values_clean['Lambda1'][-1]
-# lambda_2_value = lambda_2_values_clean['Lambda2'].iloc[-1] if isinstance(lambda_2_values_clean['Lambda2'], pd.Series) else lambda_2_values_clean['Lambda2'][-1]
-# lambda_1_value_noisy = lambda_1_values_noisy['Lambda1'].iloc[-1] if isinstance(lambda_1_values_noisy['Lambda1'], pd.Series) else lambda_1_values_noisy['Lambda1'][-1]
-# lambda_2_value_noisy = lambda_2_values_noisy['Lambda2'].iloc[-1] if isinstance(lambda_2_values_noisy['Lambda2'], pd.Series) else lambda_2_values_noisy['Lambda2'][-1]
+ 
 lambda_1_value = lambda_1_values_clean['l1'].iloc[-1] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][-1]
 lambda_2_value = lambda_2_values_clean['l2'].iloc[-1] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][-1]
 lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[-1] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][-1]
