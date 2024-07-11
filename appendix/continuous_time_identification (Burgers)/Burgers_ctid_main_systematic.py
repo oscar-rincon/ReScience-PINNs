@@ -23,7 +23,6 @@ from pinns import *  # Physics Informed Neural Networks utilities
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
 
-
 def f(model, x, t, nu, lambda_1, lambda_2):
     """
     Computes the residual of the PDE using the given neural network model.
@@ -189,6 +188,7 @@ def train_lbfgs(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50
     optimizer.step(closure_fn)
 
 def main_loop(N_u, noise, num_layers, num_neurons): 
+
     # Initialize variables
     iter = 0  # Initialize iteration counter
     nu = 0.01/np.pi
@@ -235,7 +235,6 @@ def main_loop(N_u, noise, num_layers, num_neurons):
     #lambda_1s = []  # List to track lambda_1 values
     #lambda_2s = []  # List to track lambda_2 values
     results = []
-
 
     # Initialize the model and apply initial weights
     model = MLP(input_size=2, output_size=1, hidden_layers=num_layers, hidden_units=num_neurons, activation_function=nn.Tanh()).float().to(device)
@@ -307,26 +306,18 @@ if __name__ == "__main__":
 
     # Doman bounds
     lb = X_star.min(0)
-    ub = X_star.max(0)    
-    
-    ######################################################################
-    ######################## Noiseles Data ###############################
-    ######################################################################
-             
+    ub = X_star.max(0)              
     noise=0.0         
     idx = np.random.choice(X_star.shape[0], N_u, replace=False)
     X_u_train = X_star[idx,:]
     u_train = u_star[idx,:]
     u_train = u_train + noise*np.std(u_train)*np.random.randn(u_train.shape[0], u_train.shape[1])
+
     # Convert to tensors and set requires_grad for training with float precision
     x_u = torch.from_numpy(X_u_train[:, 0:1]).float().to(device)
     x_u.requires_grad = True
-    #x_f = torch.from_numpy(X_f_train[:, 0:1]).float().to(device)
-    #x_f.requires_grad = True
     t_u = torch.from_numpy(X_u_train[:, 1:2]).float().to(device)
     t_u.requires_grad = True
-    #t_f = torch.from_numpy(X_f_train[:, 1:2]).float().to(device)
-    #t_f.requires_grad = True
     u_train_pt = torch.from_numpy(u_train).float().to(device)
     nu = torch.tensor(nu).float().to(device)
     x_star = torch.from_numpy(X_star[:, 0:1]).float().to(device)
@@ -337,13 +328,11 @@ if __name__ == "__main__":
 
     N_u = [500, 1000, 1500, 2000]
     noise = [0.0, 0.01, 0.05, 0.1]
-    
     num_layers = [2,4,6,8]
     num_neurons = [10,20,40]
     
     error_lambda_1_table_1 = np.zeros((len(N_u), len(noise)))
     error_lambda_2_table_1 = np.zeros((len(N_u), len(noise)))
-    
     error_lambda_1_table_2 = np.zeros((len(num_layers), len(num_neurons)))
     error_lambda_2_table_2 = np.zeros((len(num_layers), len(num_neurons)))
     
@@ -357,6 +346,5 @@ if __name__ == "__main__":
                      
     np.savetxt('./tables/error_lambda_1_table_1.csv', error_lambda_1_table_1, delimiter=' & ', fmt='$%2.3f$', newline=' \\\\\n')
     np.savetxt('./tables/error_lambda_2_table_1.csv', error_lambda_2_table_1, delimiter=' & ', fmt='$%2.3f$', newline=' \\\\\n')
-
     np.savetxt('./tables/error_lambda_1_table_2.csv', error_lambda_1_table_2, delimiter=' & ', fmt='$%2.3f$', newline=' \\\\\n')
     np.savetxt('./tables/error_lambda_2_table_2.csv', error_lambda_2_table_2, delimiter=' & ', fmt='$%2.3f$', newline=' \\\\\n')            

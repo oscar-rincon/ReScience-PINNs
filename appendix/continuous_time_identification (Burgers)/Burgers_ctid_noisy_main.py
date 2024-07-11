@@ -188,6 +188,7 @@ def train_lbfgs(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50
     optimizer.step(closure_fn)
 
 if __name__ == "__main__":
+
     # Set a fixed seed for reproducibility
     set_seed(42)
 
@@ -204,26 +205,19 @@ if __name__ == "__main__":
     # Initialize variables
     iter = 0  # Initialize iteration counter
     nu = 0.01/np.pi
-
-    N_u = 2000
-     
-    data = scipy.io.loadmat('../Data/burgers_shock.mat')
-    
+    N_u = 2000   
+    data = scipy.io.loadmat('../Data/burgers_shock.mat')   
     t = data['t'].flatten()[:,None]
     x = data['x'].flatten()[:,None]
-    Exact = np.real(data['usol']).T
-    
-    X, T = np.meshgrid(x,t)
-    
+    Exact = np.real(data['usol']).T   
+    X, T = np.meshgrid(x,t)   
     X_star = np.hstack((X.flatten()[:,None], T.flatten()[:,None]))
     u_star = Exact.flatten()[:,None]              
 
     # Doman bounds
     lb = X_star.min(0)
     ub = X_star.max(0)    
- 
-    noise = 0.01            
-             
+    noise = 0.01                        
     idx = np.random.choice(X_star.shape[0], N_u, replace=False)
     X_u_train = X_star[idx,:]
     u_train = u_star[idx,:]

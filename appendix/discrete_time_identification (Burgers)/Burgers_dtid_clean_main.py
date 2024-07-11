@@ -23,7 +23,6 @@ from pinns import *  # Physics Informed Neural Networks utilities
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
 
-
 def net_U0(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     """
     Simulates one step of a dynamical system using a neural network model and IRK integration.
@@ -247,15 +246,13 @@ if __name__ == "__main__":
     q = int(np.ceil(0.5*np.log(np.finfo(float).eps)/np.log(dt)))
     dt = torch.from_numpy(dt).to(torch.float32).to(device)  # Time step size
 
-
     # Load IRK weights for numerical integration
     tmp = np.float32(np.loadtxt('../../Utilities/IRK_weights/Butcher_IRK%d.txt' % (q), ndmin = 2))
     weights = np.reshape(tmp[0:q**2+q], (q+1, q))    
     IRK_alpha = torch.from_numpy(weights[0:-1,:]).float().to(device)
     IRK_beta = torch.from_numpy(weights[-1:,:]).float().to(device)       
     IRK_times = tmp[q**2+q:]
-
-    
+ 
     # Doman bounds
     lb = x_star.min(0)
     ub = x_star.max(0)

@@ -23,7 +23,6 @@ from pinns import *  # Physics Informed Neural Networks utilities
 # Suppress warnings to keep the output clean
 warnings.filterwarnings("ignore")
 
- 
 def f(model, x, x_1, dt, IRK_weights):
     """
     Simulates one step of a dynamical system using a neural network model and IRK integration.
@@ -167,6 +166,7 @@ def train_lbfgs(model, x, x_1, x_star, dt, IRK_weights, U0_real, num_iter=50_000
     optimizer.step(closure_fn)
 
 if __name__ == "__main__":
+    
     # Set a fixed seed for reproducibility
     set_seed(42)
 

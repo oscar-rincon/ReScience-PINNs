@@ -255,7 +255,7 @@ if __name__ == "__main__":
         os.makedirs('training')
     if not os.path.exists('tables'):
         os.makedirs('tables')
-    # Initialize variables
+    
     # Initialize variables
     results = []
     iter = 0  # Initialize iteration counter
@@ -263,16 +263,13 @@ if __name__ == "__main__":
     noise = 0.0  # Noise level (unused)
     N_u = 100  # Number of training points for u
     N_f = 10_000  # Number of training points for f
-
     N = 250
     lb = np.array([-1.0])
     ub = np.array([1.0])    
     data = scipy.io.loadmat('../Data/burgers_shock.mat')
-    
     t = data['t'].flatten()[:,None] # T x 1
     x = data['x'].flatten()[:,None] # N x 1
     Exact = np.real(data['usol']).T.astype(np.float32) # T x N
-    
     idx_t0 = 10
     idx_t1 = 90
     dt = torch.from_numpy(t[idx_t1] - t[idx_t0]).to(torch.float32)  # Time step size

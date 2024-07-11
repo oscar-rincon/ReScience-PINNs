@@ -1,7 +1,8 @@
+# Import standard libraries
 import sys
 import os
-import time
 import warnings
+
 # Determine the current directory of this script
 current_dir = os.path.dirname(os.path.abspath(__file__))
 utilities_dir = os.path.join(current_dir, '../../Utilities')
@@ -41,13 +42,11 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 # Import for creating GIFs from images
 import imageio
 
-
 # Create directories for saving figures if they do not already exist
 if not os.path.exists('figures'):
     os.makedirs('figures')
 if not os.path.exists('figures_iters'):
     os.makedirs('figures_iters')
-
 
 # Load the data
 lambda_1_values_clean = pd.read_csv('training/lambda_1s_clean.csv')
@@ -95,8 +94,6 @@ axs[1].legend(frameon=False)
 plt.tight_layout()
 plt.savefig('figures/Burgers_ctid_lambda_curves.pdf')    
 
-
-
 # Set a fixed seed for reproducibility
 set_seed(42)
 
@@ -113,27 +110,19 @@ if not os.path.exists('training'):
 # Initialize variables
 iter = 0  # Initialize iteration counter
 nu = 0.01/np.pi
-
 N_u = 2000
-    
 data = scipy.io.loadmat('../Data/burgers_shock.mat')
-
 t = data['t'].flatten()[:,None]
 x = data['x'].flatten()[:,None]
 Exact = np.real(data['usol']).T
-
 X, T = np.meshgrid(x,t)
-
 X_star = np.hstack((X.flatten()[:,None], T.flatten()[:,None]))
 u_star = Exact.flatten()[:,None]              
 
 # Doman bounds
 lb = X_star.min(0)
 ub = X_star.max(0)    
-
-
-noise = 0.01            
-            
+noise = 0.01                    
 idx = np.random.choice(X_star.shape[0], N_u, replace=False)
 X_u_train = X_star[idx,:]
 u_train = u_star[idx,:]
@@ -152,13 +141,11 @@ t_star = torch.from_numpy(X_star[:, 1:2]).float().to(device)
 t_star.requires_grad = True
 u_star = torch.from_numpy(u_star).T.float().to(device)
 
-
 # Initialize the model and apply initial weights
 model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).to(device)
 model_path = 'Burgers_ctid_clean.pt'
 model.load_state_dict(torch.load(model_path))
 model.eval()
-
 u_pred = model(torch.cat((x_star, t_star), dim=1)) 
 U_pred = griddata(torch.cat((x_star, t_star), dim=1).cpu().detach().numpy(), u_pred.flatten().cpu().detach().numpy(), (X, T), method='cubic')
 min_value = np.min(-1)
@@ -168,7 +155,6 @@ lambda_1_value = lambda_1_values_clean['l1'].iloc[-1] if isinstance(lambda_1_val
 lambda_2_value = lambda_2_values_clean['l2'].iloc[-1] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][-1]
 lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[-1] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][-1]
 lambda_2_value_noisy = lambda_2_values_noisy['l2'].iloc[-1] if isinstance(lambda_2_values_noisy['l2'], pd.Series) else lambda_2_values_noisy['l2'][-1]
-
 
 ######################################################################
 ############################# Plotting ###############################

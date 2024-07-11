@@ -188,6 +188,7 @@ def train_lbfgs(model, x_u, t_u, nu, u_train_pt, lambda_1, lambda_2, num_iter=50
     optimizer.step(closure_fn)
 
 if __name__ == "__main__":
+    
     # Set a fixed seed for reproducibility
     set_seed(42)
 

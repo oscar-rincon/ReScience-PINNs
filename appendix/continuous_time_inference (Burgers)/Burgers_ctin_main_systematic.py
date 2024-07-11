@@ -175,8 +175,7 @@ def train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
 
 def main_loop(N_u, N_f, num_layers, num_neurons): 
 
-    # Initialize variables
-    
+    # Initialize variables 
     iter = 0  # Initialize iteration counter
     nu = 0.01 / np.pi  # Viscosity
     noise = 0.0  # Noise level (unused)
@@ -331,7 +330,6 @@ if __name__ == "__main__":
 
     N_u = [20, 40, 60, 80, 100, 200]
     N_f = [2000, 4000, 6000, 7000, 8000, 10000]
-    
     num_layers = [2,4,6,8]
     num_neurons = [10,20,40]    
     

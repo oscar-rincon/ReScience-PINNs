@@ -28,7 +28,6 @@ from functools import partial
 # Disable all warnings (not recommended for production code)
 warnings.filterwarnings("ignore")
 
- 
 def f(model, x_0, x_1, dt, IRK_weights):
     """
     Simulates one step of a dynamical system using a neural network model and IRK integration.

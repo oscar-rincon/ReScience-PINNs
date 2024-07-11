@@ -1,6 +1,6 @@
 # Burgers equation - Continuous time inference
 
-![Burgers_ti](figures/Burgers_ctin.gif)
+![Burgers_ctin](figures/Burgers_ctin.gif)
 
 ## Summary 
 
