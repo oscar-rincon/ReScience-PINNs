@@ -250,7 +250,10 @@ if __name__ == "__main__":
     dt = dt.to(device)  # Move time step size
     x_star = torch.from_numpy(x_star).float().to(device)
     x_star.requires_grad = True    
- 
+
+
+
+
     # Initialize the model and apply initial weights
     model = MLP(input_size=1, output_size=q+1, hidden_layers=4, hidden_units=50, activation_function=nn.Tanh()).float().to(device)
     model.apply(init_weights)

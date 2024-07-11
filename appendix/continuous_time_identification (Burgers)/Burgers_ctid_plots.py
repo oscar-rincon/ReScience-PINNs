@@ -159,7 +159,7 @@ u_star = torch.from_numpy(u_star).T.float().to(device)
 
 # Initialize the model and apply initial weights
 model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).to(device)
-model_path = 'Burgers_ctid.pt'
+model_path = 'Burgers_ctid_clean.pt'
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
