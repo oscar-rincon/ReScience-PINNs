@@ -35,15 +35,7 @@ make run_KdV_clean_main
 make run_KdV_noisy_main
 ```
 
-and then 
-
 
 ```bash
 make run_KdV_plots
-```
-
-to clean generated files:
-
-```bash
-make clean
 ```

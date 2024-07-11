@@ -35,15 +35,9 @@ make run_NS_clean_main
 make run_NS_noisy_main
 ```
 
-and then 
 
 
 ```bash
 make run_NS_plots
 ```
-
-to clean generated files:
-
-```bash
-make clean
-```
+ 

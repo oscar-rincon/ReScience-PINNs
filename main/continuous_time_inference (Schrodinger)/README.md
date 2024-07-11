@@ -22,15 +22,7 @@ or
 make run_Schrodinger_main
 ```
 
-and then 
-
-
 ```bash
 make run_Schrodinger_plots
 ```
 
-to clean generated files:
-
-```bash
-make clean
-```

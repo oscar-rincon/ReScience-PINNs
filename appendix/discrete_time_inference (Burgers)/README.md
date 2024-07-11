@@ -22,14 +22,8 @@ or
 make run_Burgers_dtin_main
 ```
 
-and then 
 
 ```bash
 make run_Burgers_dtin_plots
 ```
 
-to clean generated files:
-
-```bash
-make clean
-```

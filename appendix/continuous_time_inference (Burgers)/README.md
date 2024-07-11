@@ -22,14 +22,7 @@ or
 make run_Burgers_ctin_main
 ```
 
-and then 
-
 ```bash
 make run_Burgers_ctin_plots
 ```
 
-to clean generated files:
-
-```bash
-make clean
-```

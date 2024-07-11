@@ -21,15 +21,9 @@ or
 make run_AC_main
 ```
 
-and then 
 
 
 ```bash
 make run_AC_plots
 ```
 
-to clean generated files:
-
-```bash
-make clean
-```
