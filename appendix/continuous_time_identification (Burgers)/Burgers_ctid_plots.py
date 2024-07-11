@@ -61,10 +61,10 @@ NS_training_data_noisy = pd.read_csv('training/Burgers_ctid_noisy_training_data.
 fig, axarr  = newfig(0.8, 0.8)
 
 # Plot clean loss curve
-axarr.semilogy(NS_training_data_clean['Iter'], NS_training_data_clean['Loss'], label='Clean', color='blue', linewidth=1)
+axarr.semilogy(NS_training_data_clean['Iter'], NS_training_data_clean['Loss'], label='Clean', color='blue', linewidth=1 )
 
 # Plot noisy loss curve
-axarr.semilogy(NS_training_data_noisy['Iter'], NS_training_data_noisy['Loss'], label='Noisy', color='red', linewidth=1)
+axarr.semilogy(NS_training_data_noisy['Iter'], NS_training_data_noisy['Loss'], label='Noisy', color='red', linewidth=1, linestyle='--')
 
 axarr.set_xlabel('Iteration')
 axarr.set_ylabel('Loss')
@@ -163,12 +163,19 @@ model_path = 'Burgers_ctid.pt'
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
-U_pred = model(torch.cat((x_star, t_star), dim=1)) 
-
+u_pred = model(torch.cat((x_star, t_star), dim=1)) 
+U_pred = griddata(torch.cat((x_star, t_star), dim=1).cpu().detach().numpy(), u_pred.flatten().cpu().detach().numpy(), (X, T), method='cubic')
+min_value = np.min(-1)
+max_value = np.max(1)
+# lambda_1_value = lambda_1_values_clean['Lambda1'].iloc[-1] if isinstance(lambda_1_values_clean['Lambda1'], pd.Series) else lambda_1_values_clean['Lambda1'][-1]
+# lambda_2_value = lambda_2_values_clean['Lambda2'].iloc[-1] if isinstance(lambda_2_values_clean['Lambda2'], pd.Series) else lambda_2_values_clean['Lambda2'][-1]
+# lambda_1_value_noisy = lambda_1_values_noisy['Lambda1'].iloc[-1] if isinstance(lambda_1_values_noisy['Lambda1'], pd.Series) else lambda_1_values_noisy['Lambda1'][-1]
+# lambda_2_value_noisy = lambda_2_values_noisy['Lambda2'].iloc[-1] if isinstance(lambda_2_values_noisy['Lambda2'], pd.Series) else lambda_2_values_noisy['Lambda2'][-1]
 lambda_1_value = lambda_1_values_clean['l1'].iloc[-1] if isinstance(lambda_1_values_clean['l1'], pd.Series) else lambda_1_values_clean['l1'][-1]
 lambda_2_value = lambda_2_values_clean['l2'].iloc[-1] if isinstance(lambda_2_values_clean['l2'], pd.Series) else lambda_2_values_clean['l2'][-1]
 lambda_1_value_noisy = lambda_1_values_noisy['l1'].iloc[-1] if isinstance(lambda_1_values_noisy['l1'], pd.Series) else lambda_1_values_noisy['l1'][-1]
 lambda_2_value_noisy = lambda_2_values_noisy['l2'].iloc[-1] if isinstance(lambda_2_values_noisy['l2'], pd.Series) else lambda_2_values_noisy['l2'][-1]
+
 
 ######################################################################
 ############################# Plotting ###############################
@@ -184,7 +191,7 @@ ax = plt.subplot(gs0[:, :])
 
 h = ax.imshow(U_pred.T, interpolation='nearest', cmap='rainbow', 
                 extent=[t.min(), t.max(), x.min(), x.max()], 
-                origin='lower', aspect='auto')
+                origin='lower', aspect='auto', vmin=min_value, vmax=max_value)
 divider = make_axes_locatable(ax)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 fig.colorbar(h, cax=cax)
@@ -248,6 +255,128 @@ s3 = r'Identified PDE (1\% noise) & '
 s4 = r'$u_t + %.5f u u_x - %.7f u_{xx} = 0$  \\  \hline ' % (lambda_1_value_noisy, lambda_2_value_noisy)
 s5 = r'\end{tabular}$'
 s = s1+s2+s3+s4+s5
-ax.text(0.1,0.1,s)
+ax.text(0.1,0.3,s)
     
 plt.savefig('./figures/Burgers_ctid.pdf')  
+
+
+# Generate images for GIF
+ 
+model_dir = 'models_iters/'
+image_dir = 'figures_iters/'
+gif_filename = 'figures/Burgers_ctid.gif'
+
+
+# Definir el límite
+limite = 3_001
+step = 100
+
+for iter_num in range(step, limite, step):
+    # Obtener los índices correctos para lambda_1_values_clean
+    if iter_num > lambda_1_values_clean['l1'].index[-1]:
+        iter_num_clean = math.floor(lambda_1_values_clean['l1'].index[-1] / 1000) * 1000
+    else:
+        iter_num_clean = iter_num 
+
+    # Obtener los índices correctos para lambda_1_values_noisy
+    if iter_num > lambda_1_values_noisy['l1'].index[-1]:
+        iter_num_noisy = math.floor(lambda_1_values_noisy['l1'].index[-1] / 1000) * 1000
+    else:
+        iter_num_noisy = iter_num 
+    
+    # Obtener los valores lambda
+    lambda_1_value = lambda_1_values_clean['l1'][iter_num_clean]
+    lambda_2_value = lambda_2_values_clean['l2'][iter_num_clean]
+    lambda_1_value_noisy = lambda_1_values_noisy['l1'][iter_num_noisy]
+    lambda_2_value_noisy = lambda_2_values_noisy['l2'][iter_num_noisy]
+        
+    ######################################################################
+    ############################# Plotting ###############################
+    ######################################################################    
+
+    fig, ax = newfig(1.0, 1.4)
+    ax.axis('off')
+
+    ####### Row 0: u(t,x) ##################    
+    gs0 = gridspec.GridSpec(1, 2)
+    gs0.update(top=1-0.06, bottom=1-1.0/3.0+0.06, left=0.15, right=0.85, wspace=0)
+    ax = plt.subplot(gs0[:, :])
+
+    h = ax.imshow(U_pred.T, interpolation='nearest', cmap='rainbow', 
+                    extent=[t.min(), t.max(), x.min(), x.max()], 
+                    origin='lower', aspect='auto', vmin=min_value, vmax=max_value)
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(h, cax=cax)
+
+    ax.plot(X_u_train[:,1], X_u_train[:,0], 'kx', label = 'Data (%d points)' % (u_train.shape[0]), markersize = 2, clip_on = False)
+
+    line = np.linspace(x.min(), x.max(), 2)[:,None]
+    ax.plot(t[25]*np.ones((2,1)), line, 'w-', linewidth = 1)
+    ax.plot(t[50]*np.ones((2,1)), line, 'w-', linewidth = 1)
+    ax.plot(t[75]*np.ones((2,1)), line, 'w-', linewidth = 1)
+
+    ax.set_xlabel('$t$')
+    ax.set_ylabel('$x$')
+    ax.legend(loc='upper center', bbox_to_anchor=(1.0, -0.125), ncol=5, frameon=False)
+    ax.set_title('$u(t,x)$', fontsize = 10)
+
+    ####### Row 1: u(t,x) slices ##################    
+    gs1 = gridspec.GridSpec(1, 3)
+    gs1.update(top=1-1.0/3.0-0.1, bottom=1.0-2.0/3.0, left=0.1, right=0.9, wspace=0.5)
+
+    ax = plt.subplot(gs1[0, 0])
+    ax.plot(x,Exact[25,:], 'b-', linewidth = 2, label = 'Exact')       
+    ax.plot(x,U_pred[25,:], 'r--', linewidth = 2, label = 'Prediction')
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$u(t,x)$')    
+    ax.set_title('$t = 0.25$', fontsize = 10)
+    ax.axis('square')
+    ax.set_xlim([-1.1,1.1])
+    ax.set_ylim([-1.1,1.1])
+
+    ax = plt.subplot(gs1[0, 1])
+    ax.plot(x,Exact[50,:], 'b-', linewidth = 2, label = 'Exact')       
+    ax.plot(x,U_pred[50,:], 'r--', linewidth = 2, label = 'Prediction')
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$u(t,x)$')
+    ax.axis('square')
+    ax.set_xlim([-1.1,1.1])
+    ax.set_ylim([-1.1,1.1])
+    ax.set_title('$t = 0.50$', fontsize = 10)
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.35), ncol=5, frameon=False)
+
+    ax = plt.subplot(gs1[0, 2])
+    ax.plot(x,Exact[75,:], 'b-', linewidth = 2, label = 'Exact')       
+    ax.plot(x,U_pred[75,:], 'r--', linewidth = 2, label = 'Prediction')
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$u(t,x)$')
+    ax.axis('square')
+    ax.set_xlim([-1.1,1.1])
+    ax.set_ylim([-1.1,1.1])    
+    ax.set_title('$t = 0.75$', fontsize = 10)
+
+    ####### Row 3: Identified PDE ##################    
+    gs2 = gridspec.GridSpec(1, 3)
+    gs2.update(top=1.0-2.0/3.0, bottom=0, left=0.0, right=1.0, wspace=0.0)
+
+    ax = plt.subplot(gs2[:, :])
+    ax.axis('off')
+    s1 = r'$\begin{tabular}{ |c|c| }  \hline Correct PDE & $u_t + u u_x - 0.0031831 u_{xx} = 0$ \\  \hline Identified PDE (clean data) & '
+    s2 = r'$u_t + %.5f u u_x - %.7f u_{xx} = 0$ \\  \hline ' % (lambda_1_value, lambda_2_value)
+    s3 = r'Identified PDE (1\% noise) & '
+    s4 = r'$u_t + %.5f u u_x - %.7f u_{xx} = 0$  \\  \hline ' % (lambda_1_value_noisy, lambda_2_value_noisy)
+    s5 = r'\end{tabular}$'
+    s = s1+s2+s3+s4+s5
+    ax.text(0.1,0.3,s)        
+
+    image_filename = f'./figures_iters/Burgers_ctid_{iter_num}.png'
+    savefig(image_filename) 
+     
+# Create GIF
+images = []
+for i in range(step, limite, step):
+    image_path = os.path.join(image_dir, f'Burgers_ctid_{i}.png')
+    images.append(imageio.imread(image_path))
+
+imageio.mimsave(gif_filename, images, fps=5)     

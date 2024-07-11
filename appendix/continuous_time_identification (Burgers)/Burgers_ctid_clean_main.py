@@ -276,7 +276,7 @@ if __name__ == "__main__":
     error_lambda_1s = np.abs(np.array(lambda_1s) - 1.0) / 1.0 * 100
     error_lambda_2s = np.abs(np.array(lambda_2s) - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
     # Save results and errors to CSV files
-    np.savetxt("training/Burgers_clean_ctid_training_data.csv", np.column_stack([results[:,0], results[:,1], error_lambda_1s, error_lambda_2s]), delimiter=",", header="Iter,Loss,ErrorLambda1,ErrorLambda2", comments="")
+    np.savetxt("training/Burgers_ctid_clean_training_data.csv", np.column_stack([results[:,0], results[:,1], error_lambda_1s, error_lambda_2s]), delimiter=",", header="Iter,Loss,ErrorLambda1,ErrorLambda2", comments="")
     np.savetxt("training/lambda_1s_clean.csv", lambda_1s, delimiter=",", header="l1", comments="")    
     np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")
     # Save model state
