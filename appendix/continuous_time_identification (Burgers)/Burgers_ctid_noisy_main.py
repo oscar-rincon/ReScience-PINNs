@@ -207,7 +207,6 @@ if __name__ == "__main__":
     lambda_2s = []  # List to track lambda_2 values
     results = []
 
-
     # Initialize the model and apply initial weights
     model = MLP(input_size=2, output_size=1, hidden_layers=8, hidden_units=20, activation_function=nn.Tanh()).float().to(device)
     model.apply(init_weights)
@@ -235,23 +234,7 @@ if __name__ == "__main__":
     # Final loss and L2 error
     final_loss = results[-1][1]
     print(f"Final Loss: {final_loss:.6e}")
-    final_l2 = results[-1][2]
-    print(f"Final L2: {final_l2:.6e}")
-
-    # Save training summary
-    with open('training/Burgers_ctid_noisy_training_summary.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
-        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
-        file.write(f"Total iterations: {iter:.6e}\n")
-        file.write(f"Final Loss: {final_loss:.6e}\n")
-        file.write(f"Final L2: {final_l2:.6e}\n")
-
-    # Save training data and model state
-    results = np.array(results)
-    np.savetxt("training/Burgers_ctid_training_data_noisy.csv", results, delimiter=",", header="Iter,Loss,L2", comments="")
-    torch.save(model.state_dict(), 'Burgers_ctid.pt')
-
+ 
     # Calculate percentage error for lambda_1 and lambda_2
     error_lambda_1 = np.abs(lambda_1s[-1] - 1.0) / 1.0 * 100
     error_lambda_2 = np.abs(lambda_2s[-1] - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
