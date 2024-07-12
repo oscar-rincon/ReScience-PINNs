@@ -85,7 +85,7 @@ def init_weights(m):
 
 # def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')):
 #     """
-#     Computes the second-order gradient of `dy` with respect to `x`.
+#     Computes the  forward gradient of a given tensor with respect to another tensor.
 
 #     Args:
 #         dy (torch.Tensor): The tensor whose gradient will be computed.
@@ -100,16 +100,16 @@ def init_weights(m):
 #     return torch.autograd.grad(g, z, grad_outputs=torch.ones(g.shape, dtype=torch.float32, device=device), create_graph=True)[0]       
 
 
-def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')) -> torch.Tensor:
     """
-    Computes the first-order forward gradient of a given tensor with respect to another tensor.
+    Computes the  forward gradient of a given tensor with respect to another tensor.
 
     Args:
         dy (torch.Tensor): The tensor whose gradient will be computed.
         x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
 
     Returns:
-        torch.Tensor: The computed first-order forward gradient.
+        torch.Tensor: The computed forward gradient.
     """
     z = torch.ones(dy.shape, device=dy.device).requires_grad_()
     g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]

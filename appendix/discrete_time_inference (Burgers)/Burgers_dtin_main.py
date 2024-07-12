@@ -43,8 +43,8 @@ def f(model, x, x_1, dt, IRK_weights):
     nu = 0.01/torch.pi
     U1 = model(x)
     U = U1[:, :-1]
-    U_x = fwd_gradients_0(U, x,device=device)
-    U_xx = fwd_gradients_0(U_x, x,device=device)
+    U_x = fwd_gradients_0(U, x)
+    U_xx = fwd_gradients_0(U_x, x)
     F = - U*U_x + nu*U_xx 
     U0 = U1 - dt * torch.matmul(F, IRK_weights)
     U1 = model(x_1)
@@ -239,18 +239,18 @@ if __name__ == "__main__":
     train_adam(model, x0, x1, x_star, dt, IRK_weights, u0_real, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    print(f"Adam training time: {adam_training_time:.6e} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x0, x1, x_star, dt, IRK_weights, u0_real, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
 
     # Final loss and L2 error
     final_loss = results[-1][1]
@@ -260,9 +260,9 @@ if __name__ == "__main__":
 
     # Save times in a text file along with the final L2 loss
     with open('training/Burgers_dtin_training_summary.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2e} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2e} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2e} seconds\n")
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
         file.write(f"Total iterations: {iter:.6e}\n") 
         file.write(f"Final Loss: {final_loss:.6e}\n")
         file.write(f"Final L2: {final_l2:.6e}\n")

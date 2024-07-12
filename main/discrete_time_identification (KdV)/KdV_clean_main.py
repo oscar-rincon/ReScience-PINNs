@@ -44,9 +44,9 @@ def net_U0(model, x_pt, lambda_1, lambda_2, dt, IRK_alpha):
     """
     lambda_2 = torch.exp(lambda_2)
     U = model(x_pt)
-    U_x = fwd_gradients_0(U, x_pt)
-    U_xx = fwd_gradients_0(U_x, x_pt)
-    U_xxx = fwd_gradients_0(U_xx, x_pt)
+    U_x = fwd_gradients_0(U, x_pt, device=device)
+    U_xx = fwd_gradients_0(U_x, x_pt, device=device)
+    U_xxx = fwd_gradients_0(U_xx, x_pt, device=device)
     F = -lambda_1 * U * U_x - lambda_2 * U_xxx
     U0 = U - dt * torch.matmul(F, IRK_alpha.T)
     return U0

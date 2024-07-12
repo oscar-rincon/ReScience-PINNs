@@ -4,9 +4,9 @@
 
 ## Summary
 
-- Total training time: $2.04 \times 10^2$ seconds
-- Total number of iterations: $7.699 \times 10^3$
-- $\text{L}_2$: $4.516002 \times 10^{-2}$            
+- Total training time: $5.083700 \times 10^2$ seconds
+- Total number of iterations: 17661
+- $\text{L}_2$: $7.933333 \times 10^{-2}$            
 
 
 ## Running Scripts

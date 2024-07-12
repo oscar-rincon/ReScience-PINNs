@@ -222,12 +222,7 @@ if __name__ == "__main__":
     # Doman bounds
     lb = X_star.min(0)
     ub = X_star.max(0)    
-    
-    ######################################################################
-    ######################## Noiseles Data ###############################
-    ######################################################################
-    noise = 0.0            
-             
+    noise = 0.0                   
     idx = np.random.choice(X_star.shape[0], N_u, replace=False)
     X_u_train = X_star[idx,:]
     u_train = u_star[idx,:]
@@ -264,18 +259,18 @@ if __name__ == "__main__":
     train_adam(model, x_u, t_u, nu, u_train_pt,lambda_1, lambda_2, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    print(f"Adam training time: {adam_training_time:.6e} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x_u, t_u, nu, u_train_pt,lambda_1, lambda_2, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
     
    # Final loss and L2 error
     final_loss = results[-1][1]
@@ -284,18 +279,18 @@ if __name__ == "__main__":
     # Calculate percentage error for lambda_1 and lambda_2
     error_lambda_1 = np.abs(lambda_1s[-1] - 1.0) / 1.0 * 100
     error_lambda_2 = np.abs(lambda_2s[-1] - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
-    print(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%")
-    print(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%")
+    print(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%")
+    print(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%")
 
     # Save training summary to a text file
     with open('training/Burgers_ctid_clean_training_summary.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
         file.write(f"Total iterations: {iter}\n") 
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%\n")
-        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%\n")
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%\n")
+        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%\n")
 
     # Convert results to numpy array for processing
     results = np.array(results)
@@ -308,5 +303,3 @@ if __name__ == "__main__":
     np.savetxt("training/lambda_2s_clean.csv", lambda_2s, delimiter=",", header="l2", comments="")
     # Save model state
     torch.save(model.state_dict(), 'Burgers_ctid_clean.pt')     
-
-        

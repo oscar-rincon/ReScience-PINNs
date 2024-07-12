@@ -217,7 +217,7 @@ s3 = r'Identified PDE (1\% noise) & '
 s4 = r'$u_t + %.3f u u_x + %.6f u_{xx} = 0$  \\  \hline ' % (lambda_1_value_noisy, lambda_2_value_noisy)
 s5 = r'\end{tabular}$'
 s = s1+s2+s3+s4+s5
-ax.text(-0.1,0.2,s)
+ax.text(-0.1,0.4,s)
 
 plt.savefig('./figures/Burgers_dtid.pdf')  
 

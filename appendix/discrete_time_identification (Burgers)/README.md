@@ -4,9 +4,19 @@
 
 ## Summary
 
-- Total training time: $1.916707 \times 10^2$ seconds
-- Total number of iterations: $4.027000 \times 10^3$
-- $\text{L}_2$: $1.328988 \times 10^{-3}$            
+### Clean data
+
+- Total training time: $5.032212 \times 10^2$ seconds
+- Total number of iterations: 14083
+- Error in estimating $\lambda_{1}$: $1.776218 \times 10^-3 $ %
+- Error in estimating $\lambda_{2}$: $1.386773 \times 10^-1 $ %
+
+### Noisy data
+
+- Total training time: $1.016188 \times 10^2$ seconds
+- Total number of iterations: 3220  
+- Error in estimating $\lambda_{1}$: $6.062984 \times 10^-2 $ %
+- Error in estimating $\lambda_{2}$: $3.716909 \times 10^-1 $ %
 
 
 ## Running Scripts

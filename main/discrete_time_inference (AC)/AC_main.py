@@ -47,8 +47,8 @@ def f(model, x_0, x_1, dt, IRK_weights):
     """
     U1 = model(x_0)
     U = U1[:, :-1]
-    U_x = fwd_gradients_0(U, x_0,device=device)
-    U_xx = fwd_gradients_0(U_x, x_0,device=device)
+    U_x = fwd_gradients_0(U, x_0)
+    U_xx = fwd_gradients_0(U_x, x_0)
     F = 5.0 * U - 5.0 * U**3 + 0.0001 * U_xx
     U0 = U1 - dt * torch.matmul(F, IRK_weights)
     U1 = model(x_1)

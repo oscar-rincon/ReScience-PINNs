@@ -247,18 +247,18 @@ def main_loop(N_u, noise, num_layers, num_neurons):
     train_adam(model, x_u, t_u, nu, u_train_pt,lambda_1, lambda_2, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    #print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x_u, t_u, nu, u_train_pt,lambda_1, lambda_2, num_iter=1)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.2e} seconds")
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    #print(f"Total training time: {total_training_time:.2f} seconds")
 
     # Calculate percentage error for lambda_1 and lambda_2
     #error_lambda_1 = np.abs(lambda_1s[-1] - 1.0) / 1.0 * 100
@@ -268,8 +268,8 @@ def main_loop(N_u, noise, num_layers, num_neurons):
     error_lambda_2 = (np.abs(torch.exp(lambda_2).cpu().detach().numpy() -nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100).item()
 
 
-    print(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%")
-    print(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%")
+    print(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%")
+    print(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%")
 
     return error_lambda_1, error_lambda_2
 

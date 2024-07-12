@@ -246,11 +246,11 @@ def main_loop(N_u, N_f, num_layers, num_neurons):
     train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    #print(f"Total training time: {total_training_time:.2f} seconds")
+    #print(f"Total training time: {total_training_time:.6e} seconds")
 
     u_pred = model(torch.cat((x_star, t_star), dim=1))
     error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)

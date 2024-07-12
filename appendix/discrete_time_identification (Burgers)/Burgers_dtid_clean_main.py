@@ -41,8 +41,8 @@ def net_U0(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     """
     lambda_2 = torch.exp(lambda_2)
     U = model(x)
-    U_x = fwd_gradients_0(U, x,device=device)
-    U_xx = fwd_gradients_0(U_x, x,device=device)
+    U_x = fwd_gradients_0(U, x)
+    U_xx = fwd_gradients_0(U_x, x)
     F = - lambda_1*U*U_x + lambda_2*U_xx 
     U0 = U - dt * torch.matmul(F, IRK_alpha.T)
     return U0 
@@ -66,8 +66,8 @@ def net_U1(model, x, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta):
     """
     lambda_2 = torch.exp(lambda_2)
     U = model(x)
-    U_x = fwd_gradients_0(U, x,device=device)
-    U_xx = fwd_gradients_0(U_x, x,device=device)
+    U_x = fwd_gradients_0(U, x)
+    U_xx = fwd_gradients_0(U_x, x)
     F = - lambda_1*U*U_x + lambda_2*U_xx 
     U1 = U + dt * torch.matmul(F, (IRK_beta-IRK_alpha).T)
     return U1 
@@ -285,18 +285,18 @@ if __name__ == "__main__":
     train_adam(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    print(f"Adam training time: {adam_training_time:.6e} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
 
     # Final loss and L2 error
     final_loss = results[-1][1]
@@ -305,18 +305,18 @@ if __name__ == "__main__":
     # Calculate percentage error for lambda_1 and lambda_2
     error_lambda_1 = np.abs(lambda_1s[-1] - 1.0) / 1.0 * 100
     error_lambda_2 = np.abs(lambda_2s[-1] - nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100
-    print(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%")
-    print(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%")
+    print(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%")
+    print(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%")
 
     # Save training summary to a text file
     with open('training/Burgers_dtid_clean_training_summary.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
         file.write(f"Total iterations: {iter}\n") 
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%\n")
-        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%\n")
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%\n")
+        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%\n")
 
     # Convert results to numpy array for processing
     results = np.array(results)

@@ -258,18 +258,18 @@ if __name__ == "__main__":
     train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    print(f"Adam training time: {adam_training_time:.6e} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
 
     # Final loss and L2 error
     final_loss = results[-1][1]
