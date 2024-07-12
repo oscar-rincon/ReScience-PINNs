@@ -270,7 +270,7 @@ def main_loop(skip, noise, num_layers, num_neurons):
     train_adam(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    #print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
@@ -281,7 +281,7 @@ def main_loop(skip, noise, num_layers, num_neurons):
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    #print(f"Total training time: {total_training_time:.2f} seconds")
 
     error_lambda_1 = (np.abs(lambda_1.cpu().detach().numpy() - 1.0) / 1.0 * 100).item()
     error_lambda_2 = (np.abs(torch.exp(lambda_2).cpu().detach().numpy() -nu.cpu().detach().numpy()) / nu.cpu().detach().numpy() * 100).item()
