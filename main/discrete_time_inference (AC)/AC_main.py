@@ -253,35 +253,35 @@ if __name__ == "__main__":
     train_adam(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=10_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    print(f"Adam training time: {adam_training_time:.6e} seconds")
     
     # Training with LBFGS
     start_time_lbfgs = time.time()
     train_lbfgs(model, x0, x1, dt, IRK_weights, u0, Exact, idx_t1, results, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
     
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
 
     # Get final L2 loss value
     final_loss = results[-1][1]
-    print(f"Final Loss: {final_loss:.6f}")
+    print(f"Final Loss: {final_loss:.6e}")
 
     # Get final L2 loss value
     final_l2 = results[-1][2]
-    print(f"Final L2: {final_l2:.6f}")
+    print(f"Final L2: {final_l2:.6e}")
 
     # Save times in a text file along with the final L2 loss
     with open('training/AC_training_summary.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
         file.write(f"Total iterations: {iter}\n") 
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Final L2: {final_l2:.6f}\n")
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Final L2: {final_l2:.6e}\n")
              
     # Convert results to NumPy array and save to CSV
     results = np.array(results)

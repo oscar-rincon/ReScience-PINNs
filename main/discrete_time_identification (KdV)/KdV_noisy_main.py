@@ -284,38 +284,38 @@ if __name__ == "__main__":
     train_adam(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")    
+    print(f"Adam training time: {adam_training_time:.6e} seconds")    
     
     # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x0_pt, x1_pt, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, u0_pt, u1_pt, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
     
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
 
     # Final loss value
     final_loss = results[-1][1]
-    print(f"Final Loss: {final_loss:.6f}")
+    print(f"Final Loss: {final_loss:.6e}")
 
     # Calculate percentage error for lambda_1 and lambda_2
     error_lambda_1 = np.abs(lambda_1s[-1] - 1.0) / 1.0 * 100
     error_lambda_2 = np.abs(lambda_2s[-1] - 0.0025) / 0.0025 * 100
-    print(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%")
-    print(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%")
+    print(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%")
+    print(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%")
 
     # Save training summary to a text file
     with open('training/KdV_training_summary_noisy.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
         file.write(f"Total iterations: {iter}\n") 
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%\n")
-        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%\n")
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%\n")
+        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%\n")
     
     # Convert results to numpy array for processing
     results = np.array(results)

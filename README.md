@@ -71,10 +71,12 @@ conda list -n ReScience-PINNs-env
 
 ## Running Scripts
 
-### Main scripts
+
 
 **Run the scripts individually:**
 
+
+### Main scripts
 
 **Schrodinger Equation - Continuous time inference**
 

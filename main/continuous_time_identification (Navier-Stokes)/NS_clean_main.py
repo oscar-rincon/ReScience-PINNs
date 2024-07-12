@@ -280,26 +280,26 @@ if __name__== "__main__":
     train_adam(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=200_000)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    print(f"Adam training time: {adam_training_time:.6e} seconds")
     
     # Training with L-BFGS optimizer
     start_time_lbfgs = time.time()
     train_lbfgs(model, x_train_pt, y_train_pt, t_train_pt, u_train_pt, v_train_pt, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
-    print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
+    print(f"LBFGS training time: {lbfgs_training_time:.6e} seconds")
     
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    print(f"Total training time: {total_training_time:.6e} seconds")
 
     # Final loss value
     final_loss = results[-1][1]
-    print(f"Final Loss: {final_loss:.6f}")
+    print(f"Final Loss: {final_loss:.6e}")
 
     # Final L2 loss value
     final_l2 = results[-1][2]
-    print(f"Final L2: {final_l2:.6f}")
+    print(f"Final L2: {final_l2:.6e}")
     
     # Select snapshot for test data
     snap = np.array([100])
@@ -341,19 +341,19 @@ if __name__== "__main__":
     print('Error u: %e' % (error_u))
     print('Error v: %e' % (error_v))
     print('Error p: %e' % (error_p))
-    print('Error l1: %.5f%%' % (error_lambda_1))
-    print('Error l2: %.5f%%' % (error_lambda_2))
+    print('Error l1: %.6e%%' % (error_lambda_1))
+    print('Error l2: %.6e%%' % (error_lambda_2))
 
     # Save training summary and results
     with open('training/NS_training_summary_clean.txt', 'w') as file:
-        file.write(f"Adam training time: {adam_training_time:.2f} seconds\n")
-        file.write(f"LBFGS training time: {lbfgs_training_time:.2f} seconds\n")
-        file.write(f"Total training time: {total_training_time:.2f} seconds\n")
+        file.write(f"Adam training time: {adam_training_time:.6e} seconds\n")
+        file.write(f"LBFGS training time: {lbfgs_training_time:.6e} seconds\n")
+        file.write(f"Total training time: {total_training_time:.6e} seconds\n")
         file.write(f"Total iterations: {iter}\n")
-        file.write(f"Final Loss: {final_loss:.6f}\n")
-        file.write(f"Final L2: {final_l2:.6f}\n")
-        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6f}%\n")
-        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6f}%\n")
+        file.write(f"Final Loss: {final_loss:.6e}\n")
+        file.write(f"Final L2: {final_l2:.6e}\n")
+        file.write(f"Percentage Error Lambda 1: {error_lambda_1:.6e}%\n")
+        file.write(f"Percentage Error Lambda 2: {error_lambda_2:.6e}%\n")
 
     # Save lambda values and training results to CSV files
     results = np.array(results)
