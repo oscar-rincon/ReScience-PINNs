@@ -218,10 +218,12 @@ The models were trained with a NVIDIA GeForce RTX A2000 GPU card. The summary of
 > - Burgers_dtin_main.py  
 > - Burgers_dtin_plots.py  
 > - Burgers_dtin_main_systematic.py 
-> - Burgers_ctid_main.py 
+> - Burgers_ctid_clean_main.py 
+> - Burgers_ctid_noisy_main.py 
 > - Burgers_ctid_plots.py
 > - Burgers_ctid_main_systematic.py  
-> - Burgers_dtid_main.py   
+> - Burgers_dtid_clean_main.py
+> - Burgers_dtid_noisy_main.py   
 > - Burgers_dtid_plots.py  
 > - Burgers_dtid_main_systematic.py  
 

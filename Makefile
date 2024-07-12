@@ -107,7 +107,8 @@ Burgers_dtin_main_systematic:
 # Target to run Burgers_ctid_main.py
 run_Burgers_ctid_main:
 	@echo "Running Burgers_ctid_main.py..."
-	@python appendix/continuous_time_identification\ \(Burgers\)/Burgers_ctid_main.py
+	@python appendix/continuous_time_identification\ \(Burgers\)/Burgers_ctid_clean_main.py
+	@python appendix/continuous_time_identification\ \(Burgers\)/Burgers_ctid_noisy_main.py
 	@echo "Finished Burgers_ctid_main.py..."
 
 # Target to run Burgers_ctid_plots.py  
@@ -125,7 +126,8 @@ run_Burgers_ctid_main_systematic:
 # Target to run Burgers_dtid_main.py
 run_Burgers_dtid_main:
 	@echo "Running Burgers_dtid_main.py..."
-	@python appendix/discrete_time_identification\ \(Burgers\)/Burgers_dtid_main.py
+	@python appendix/discrete_time_identification\ \(Burgers\)/Burgers_dtid_clean_main.py
+	@python appendix/discrete_time_identification\ \(Burgers\)/Burgers_dtid_noisy_main.py
 	@echo "Finished Burgers_dtid_main.py..."
 
 # Target to run Burgers_dtid_plots.py  
