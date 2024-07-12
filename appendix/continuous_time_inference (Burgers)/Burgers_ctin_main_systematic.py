@@ -110,8 +110,8 @@ def train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=50_000):
         #u_pred = model(torch.cat((x_star, t_star), dim=1))
         #error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
         iter += 1
-        if iter % 1000 == 0:
-            print(f"Adam - Iter: {iter} - Loss: {loss.item()}")
+        #if iter % 1000 == 0:
+        #    print(f"Adam - Iter: {iter} - Loss: {loss.item()}")
 
 def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     """
@@ -138,8 +138,8 @@ def closure(model, optimizer, x_u, x_f, t_u, t_f, nu, u_train_pt):
     #u_pred = model(torch.cat((x_star, t_star), dim=1)) 
     #error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
     #results.append([iter, loss.item(), error]) 
-    if iter % 1000 == 0:
-        print(f"LBFGS - Iter: {iter} - Loss: {loss.item()}")
+    #if iter % 1000 == 0:
+    #    print(f"LBFGS - Iter: {iter} - Loss: {loss.item()}")
     
     return loss
 
@@ -239,7 +239,7 @@ def main_loop(N_u, N_f, num_layers, num_neurons):
     train_adam(model, x_u, x_f, t_u, t_f, nu, u_train_pt, num_iter=0)
     end_time_adam = time.time()
     adam_training_time = end_time_adam - start_time_adam
-    print(f"Adam training time: {adam_training_time:.2f} seconds")
+    #print(f"Adam training time: {adam_training_time:.2f} seconds")
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
@@ -250,7 +250,7 @@ def main_loop(N_u, N_f, num_layers, num_neurons):
 
     # Total training time
     total_training_time = adam_training_time + lbfgs_training_time
-    print(f"Total training time: {total_training_time:.2f} seconds")
+    #print(f"Total training time: {total_training_time:.2f} seconds")
 
     u_pred = model(torch.cat((x_star, t_star), dim=1))
     error = np.linalg.norm(u_star.cpu().detach().numpy()-u_pred.cpu().detach().numpy(),2)/np.linalg.norm(u_star.cpu().detach().numpy(),2)
