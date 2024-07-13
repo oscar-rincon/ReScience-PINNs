@@ -19,8 +19,9 @@
 - Error in estimating $\lambda_{2}$: $3.716909$ $\times$ $10^{-1}$ %
 
 
-## Running Scripts
+## Systematic study
 
+## Running Scripts
 
 **Run the scripts individually:**
 
