@@ -274,7 +274,7 @@ def main_loop(skip, noise, num_layers, num_neurons):
 
     # L-BFGS optimizer
     start_time_lbfgs = time.time()
-    train_lbfgs(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, num_iter=1)
+    train_lbfgs(model, x0, x1, u0, u1, lambda_1, lambda_2, dt, IRK_alpha, IRK_beta, num_iter=50_000)
     end_time_lbfgs = time.time()
     lbfgs_training_time = end_time_lbfgs - start_time_lbfgs
     print(f"LBFGS training time: {lbfgs_training_time:.2f} seconds")
