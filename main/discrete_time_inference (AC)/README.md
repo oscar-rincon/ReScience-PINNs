@@ -11,19 +11,19 @@
 ## Running Allen–Cahn Scripts
 
 
-```bash
-make all
-```
+ **Run the scripts individually:**
 
-or
 
 ```bash
 make run_AC_main
 ```
-
-
-
+ 
 ```bash
 make run_AC_plots
 ```
 
+**Run all scripts in sequence:**
+
+```bash
+make all
+```

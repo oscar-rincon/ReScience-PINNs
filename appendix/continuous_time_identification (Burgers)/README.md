@@ -22,11 +22,7 @@
 ## Running Scripts
 
 
-```bash
-make all
-```
-
-or
+**Run the scripts individually:**
 
 ```bash
 make run_Burgers_ctid_main
@@ -35,4 +31,14 @@ make run_Burgers_ctid_main
 
 ```bash
 make run_Burgers_ctid_plots
+```
+
+```bash
+make run_Burgers_ctid_main_systematic
+```
+
+**Run all scripts in sequence:**
+
+```bash
+make all
 ```

@@ -72,7 +72,6 @@ conda list -n ReScience-PINNs-env
 ## Running Scripts
 
 
-
 **Run the scripts individually:**
 
 

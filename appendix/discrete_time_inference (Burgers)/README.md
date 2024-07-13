@@ -11,12 +11,7 @@
 
 ## Running Scripts
 
-
-```bash
-make all
-```
-
-or
+**Run the scripts individually:**
 
 ```bash
 make run_Burgers_dtin_main
@@ -27,3 +22,13 @@ make run_Burgers_dtin_main
 make run_Burgers_dtin_plots
 ```
 
+
+```bash
+make run_Burgers_dtin_main_systematic
+```
+
+**Run all scripts in sequence:**
+
+```bash
+make all
+```

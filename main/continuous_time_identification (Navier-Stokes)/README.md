@@ -20,12 +20,7 @@
 
 ## Running Navier–Stokes equation Scripts
 
-
-```bash
-make all
-```
-
-or
+**Run the scripts individually:**
 
 ```bash
 make run_NS_clean_main
@@ -35,9 +30,12 @@ make run_NS_clean_main
 make run_NS_noisy_main
 ```
 
-
-
 ```bash
 make run_NS_plots
 ```
- 
+
+**Run all scripts in sequence:**
+
+```bash
+make all
+``` 

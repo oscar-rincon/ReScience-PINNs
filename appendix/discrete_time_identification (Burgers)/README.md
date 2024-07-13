@@ -22,18 +22,22 @@
 ## Running Scripts
 
 
-```bash
-make all
-```
-
-or
+**Run the scripts individually:**
 
 ```bash
 make run_Burgers_dtid_main
 ```
 
-
 ```bash
 make run_Burgers_dtid_plots
 ```
 
+```bash
+make run_Burgers_dtid_main_systematic
+```
+
+**Run all scripts in sequence:**
+
+```bash
+make all
+```

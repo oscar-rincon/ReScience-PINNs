@@ -20,12 +20,7 @@
 
 ## Running Korteweg–de Vries equation Scripts
 
-
-```bash
-make all
-```
-
-or
+**Run the scripts individually:**
 
 ```bash
 make run_KdV_clean_main
@@ -35,7 +30,12 @@ make run_KdV_clean_main
 make run_KdV_noisy_main
 ```
 
-
 ```bash
 make run_KdV_plots
+```
+
+**Run all scripts in sequence:**
+
+```bash
+make all
 ```

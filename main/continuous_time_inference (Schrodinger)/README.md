@@ -9,13 +9,8 @@
 - $\text{L}_2$: $1.307$ $\times$ $10^{-3}$            
 
 ## Running Scripts
-
-
-```bash
-make all
-```
-
-or
+ 
+**Run the scripts individually:**
 
 ```bash
 make run_Schrodinger_main
@@ -23,5 +18,11 @@ make run_Schrodinger_main
 
 ```bash
 make run_Schrodinger_plots
+```
+
+**Run all scripts in sequence:**
+
+```bash
+make all
 ```
 
