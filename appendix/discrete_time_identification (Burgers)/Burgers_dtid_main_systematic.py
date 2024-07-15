@@ -306,6 +306,8 @@ if __name__ == "__main__":
         os.makedirs('models_iters')
     if not os.path.exists('training'):
         os.makedirs('training')
+    if not os.path.exists('tables'):
+        os.makedirs('tables')        
     results = []
     # Initialize variables
     iter = 0  # Initialize iteration counter
