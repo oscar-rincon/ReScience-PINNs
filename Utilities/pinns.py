@@ -82,24 +82,7 @@ def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
         m.bias.data.fill_(0.0)
-
-# def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')):
-#     """
-#     Computes the  forward gradient of a given tensor with respect to another tensor.
-
-#     Args:
-#         dy (torch.Tensor): The tensor whose gradient will be computed.
-#         x (torch.Tensor): The tensor with respect to which the gradient of `dy` will be computed.
-#         device (torch.device, optional): The device on which the tensors will be allocated. Defaults to torch.device('cpu').
-
-#     Returns:
-#         torch.Tensor: The second-order gradient of `dy` with respect to `x`.
-#     """
-#     z = torch.ones(dy.shape, dtype=torch.float32, requires_grad=True, device=device)
-#     g = torch.autograd.grad(dy, x, grad_outputs=z, create_graph=True)[0]
-#     return torch.autograd.grad(g, z, grad_outputs=torch.ones(g.shape, dtype=torch.float32, device=device), create_graph=True)[0]       
-
-
+ 
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')) -> torch.Tensor:
     """
     Computes the  forward gradient of a given tensor with respect to another tensor.

@@ -10,16 +10,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-#mpl.use('pgf')
-
-# def figsize(scale, nplots = 1):
-#     fig_width_pt = 390.0                          # Get this from LaTeX using \the\textwidth
-#     inches_per_pt = 1.0/72.27                       # Convert pt to inch
-#     golden_mean = (np.sqrt(5.0)-1.0)/2.0            # Aesthetic ratio (you could change this)
-#     fig_width = fig_width_pt*inches_per_pt*scale    # width in inches
-#     fig_height = nplots*fig_width*golden_mean              # height in inches
-#     fig_size = [fig_width,fig_height]
-#     return fig_size
+ 
 def figsize(width_scale=1, height_scale=1, nplots=1):
     fig_width_pt = 390.0  # Get this from LaTeX using \the\textwidth
     inches_per_pt = 1.0 / 72.27  # Convert pt to inch
@@ -59,22 +50,4 @@ def savefig(filename, crop = True):
     else:
         plt.savefig('{}'.format(filename))
 
-## Simple plot
-#fig, ax  = newfig(1.0)
-#
-#def ema(y, a):
-#    s = []
-#    s.append(y[0])
-#    for t in range(1, len(y)):
-#        s.append(a * y[t] + (1-a) * s[t-1])
-#    return np.array(s)
-#    
-#y = [0]*200
-#y.extend([20]*(1000-len(y)))
-#s = ema(y, 0.01)
-#
-#ax.plot(s)
-#ax.set_xlabel('X Label')
-#ax.set_ylabel('EMA')
-#
-#savefig('ema')
+ 
