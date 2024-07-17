@@ -82,7 +82,9 @@ def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
         m.bias.data.fill_(0.0)
- 
+      
+
+
 def fwd_gradients_0(dy: torch.Tensor, x: torch.Tensor, device=torch.device('cpu')) -> torch.Tensor:
     """
     Computes the  forward gradient of a given tensor with respect to another tensor.
