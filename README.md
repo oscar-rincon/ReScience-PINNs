@@ -1,4 +1,4 @@
-# Replication - Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations 
+# Replication of Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations 
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/oscar-rincon/ReScience-PINNs/HEAD)
 
